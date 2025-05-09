@@ -1,48 +1,102 @@
 "use client";
-import React from 'react';
-import Image from 'next/image';
+import React, { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faAngleRight } from '@fortawesome/free-solid-svg-icons';
+import { 
+  faAngleRight,
+  faCheckCircle,
+  faClock,
+  faTruck,
+  faTimesCircle
+} from '@fortawesome/free-solid-svg-icons';
 
-// Sample order data - replace with actual data fetching
-const orders = [
+interface Order {
+  id: string;
+  date: string;
+  status: 'Доставлен' | 'В пути' | 'Обработка' | 'Отменен';
+  items: {
+    image: string;
+    name: string;
+    price: string;
+    quantity: number;
+  }[];
+  total: string;
+  address: string;
+}
+
+const sampleOrders: Order[] = [
   {
-    id: 'LH-10583',
+    id: 'ORD-2024-10583',
     date: '15 мая 2024',
     status: 'Доставлен',
-    statusColor: 'green',
-    itemsPreview: [
-      "https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTF8fGNlcmFtaWN8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=60&h=60&q=80",
-      "https://images.unsplash.com/photo-1542291026-7eec264c27ff?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8c2hvZXN8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=60&h=60&q=80",
+    items: [
+      {
+        image: 'https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80',
+        name: 'Ваза "Лазурь"',
+        price: '2 800 ₽',
+        quantity: 1
+      },
+      {
+        image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80',
+        name: 'Кроссовки "Urban Run"',
+        price: '4 690 ₽',
+        quantity: 1
+      }
     ],
-    additionalItemsCount: 1,
-    itemsDescription: 'Ваза ручной работы, Кроссовки "Urban Run", ...',
     total: '7 490 ₽',
+    address: 'ул. Ленина, д. 42, кв. 15'
   },
   {
-    id: 'LH-10579',
+    id: 'ORD-2024-10579',
     date: '18 мая 2024',
-    status: 'В обработке',
-    statusColor: 'yellow',
-    itemsPreview: [
-      "https://images.unsplash.com/photo-1611117775350-ac3c7099e9c8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8dG9vbCUyMHJlcGFpcnxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=60&h=60&q=80",
+    status: 'В пути',
+    items: [
+      {
+        image: 'https://images.unsplash.com/photo-1611117775350-ac3c7099e9c8?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80',
+        name: 'Ремонт холодильника',
+        price: '500 ₽',
+        quantity: 1
+      }
     ],
-    additionalItemsCount: 0,
-    itemsDescription: 'Услуга: Ремонт бытовой техники',
     total: '500 ₽',
+    address: 'ул. Мира, д. 12'
   }
 ];
 
+const statusIcons = {
+  'Доставлен': faCheckCircle,
+  'В пути': faTruck,
+  'Обработка': faClock,
+  'Отменен': faTimesCircle
+};
+
+const statusColors = {
+  'Доставлен': 'text-green-600 bg-green-100',
+  'В пути': 'text-blue-600 bg-blue-100',
+  'Обработка': 'text-yellow-600 bg-yellow-100',
+  'Отменен': 'text-red-600 bg-red-100'
+};
+
 const OrdersTab: React.FC = () => {
-  if (orders.length === 0) {
+  const [loading, setLoading] = useState(false);
+  const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
+
+  const toggleOrder = (orderId: string) => {
+    setLoading(true);
+    setTimeout(() => {
+      setExpandedOrder(expandedOrder === orderId ? null : orderId);
+      setLoading(false);
+    }, 300);
+  };
+
+  if (sampleOrders.length === 0) {
     return (
-      <div id="orders-tab" className="tab-content p-4 text-center py-12">
-        {/* SVG and "Нет заказов" message can be added here if needed */}
-        <h3 className="mt-2 text-sm font-medium text-gray-900">Нет заказов</h3>
-        <p className="mt-1 text-sm text-gray-500">У вас пока нет активных или завершенных заказов.</p>
-        <button /* onClick={() => switchTab('home')} */
-          className="mt-6 inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-        >
+      <div className="p-6 text-center">
+        <div className="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+          <FontAwesomeIcon icon={faTimesCircle} className="text-gray-400 text-3xl" />
+        </div>
+        <h3 className="text-lg font-medium text-gray-900">Нет заказов</h3>
+        <p className="mt-1 text-gray-500">У вас пока нет активных или завершенных заказов.</p>
+        <button className="mt-6 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition">
           Начать покупки
         </button>
       </div>
@@ -50,39 +104,91 @@ const OrdersTab: React.FC = () => {
   }
 
   return (
-    <div id="orders-tab" className="tab-content p-4">
-      <h1 className="text-xl font-bold text-gray-800 mb-5">Мои заказы</h1>
+    <div className="p-4">
+      <h1 className="text-2xl font-bold text-gray-800 mb-6">Мои заказы</h1>
+      
+      {loading && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-xl">
+            Загружаем информацию...
+          </div>
+        </div>
+      )}
+
       <div className="space-y-4">
-        {orders.map((order) => (
-          <div key={order.id} className="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
-            <div className="p-4">
-              <div className="flex justify-between items-start mb-2">
+        {sampleOrders.map((order) => (
+          <div 
+            key={order.id}
+            className={`bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden transition-all
+              ${expandedOrder === order.id ? 'ring-2 ring-blue-500' : ''}`}
+          >
+            <div 
+              className="p-4 cursor-pointer"
+              onClick={() => toggleOrder(order.id)}
+            >
+              <div className="flex justify-between items-start">
                 <div>
-                  <span className="text-sm font-semibold text-gray-900">Заказ #{order.id}</span>
-                  <p className="text-xs text-gray-500">от {order.date}</p>
+                  <h3 className="font-bold text-gray-900">Заказ #{order.id}</h3>
+                  <p className="text-sm text-gray-500">{order.date}</p>
                 </div>
-                <span className={`text-xs font-medium bg-${order.statusColor}-100 text-${order.statusColor}-700 px-2.5 py-1 rounded-full`}>
+                <div className={`flex items-center text-sm px-3 py-1 rounded-full ${statusColors[order.status]}`}>
+                  <FontAwesomeIcon icon={statusIcons[order.status]} className="mr-2" />
                   {order.status}
-                </span>
+                </div>
               </div>
-              <div className="flex items-center space-x-2 my-3">
-                {order.itemsPreview.map((imgSrc, index) => (
-                  <Image key={index} src={imgSrc} alt="Preview" width={48} height={48} className="w-12 h-12 rounded-md object-cover border border-gray-200" />
+
+              <div className="mt-3 flex items-center space-x-2">
+                {order.items.slice(0, 3).map((item, index) => (
+                  <div key={index} className="w-12 h-12 rounded-md bg-gray-100 overflow-hidden">
+                    <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                  </div>
                 ))}
-                {order.additionalItemsCount > 0 && (
-                  <div className="w-12 h-12 rounded-md bg-gray-100 flex items-center justify-center border border-gray-200">
-                    <span className="text-xs text-gray-500">+{order.additionalItemsCount}</span>
+                {order.items.length > 3 && (
+                  <div className="w-12 h-12 rounded-md bg-gray-100 flex items-center justify-center">
+                    <span className="text-xs text-gray-500">+{order.items.length - 3}</span>
                   </div>
                 )}
               </div>
-              <div className="text-sm text-gray-500 truncate">
-                {order.itemsDescription}
-              </div>
             </div>
-            <div className="bg-gray-50 px-4 py-3 flex justify-between items-center border-t border-gray-200">
-              <span className="text-base font-bold text-gray-900">{order.total}</span>
-              <button className="text-sm text-blue-600 hover:text-blue-700 font-medium hover:underline">
-                Детали заказа <FontAwesomeIcon icon={faAngleRight} className="fa-xs ml-1" />
+
+            {expandedOrder === order.id && (
+              <div className="border-t border-gray-200 p-4 bg-gray-50">
+                <h4 className="font-medium mb-3">Состав заказа:</h4>
+                <ul className="space-y-3">
+                  {order.items.map((item, index) => (
+                    <li key={index} className="flex justify-between">
+                      <div className="flex items-center">
+                        <div className="w-10 h-10 rounded-md bg-gray-100 overflow-hidden mr-3">
+                          <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                        </div>
+                        <span>{item.name}</span>
+                      </div>
+                      <span className="font-medium">{item.price}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                <div className="mt-4 pt-4 border-t border-gray-200">
+                  <div className="flex justify-between mb-2">
+                    <span>Адрес доставки:</span>
+                    <span className="font-medium">{order.address}</span>
+                  </div>
+                  <div className="flex justify-between text-lg font-bold">
+                    <span>Итого:</span>
+                    <span>{order.total}</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="border-t border-gray-200 px-4 py-3 bg-gray-50 flex justify-between items-center">
+              <span className="font-bold">{order.total}</span>
+              <button 
+                className="text-blue-600 hover:text-blue-700 flex items-center"
+                onClick={() => toggleOrder(order.id)}
+              >
+                {expandedOrder === order.id ? 'Свернуть' : 'Подробности'}
+                <FontAwesomeIcon icon={faAngleRight} className={`ml-2 transition-transform ${expandedOrder === order.id ? 'transform rotate-90' : ''}`} />
               </button>
             </div>
           </div>

@@ -1,68 +1,150 @@
 "use client";
-import React from 'react';
+import React, { useState } from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faMapMarkedAlt, faTags, faChevronRight } from '@fortawesome/free-solid-svg-icons';
-import { faCreditCard, faComments } from '@fortawesome/free-regular-svg-icons';
-
-const profileLinks = [
-    { text: "Адреса доставки", icon: faMapMarkedAlt, iconColor: "text-blue-600", href: "#" },
-    { text: "Способы оплаты", icon: faCreditCard, iconColor: "text-green-600", href: "#" },
-    { text: "Мои промокоды", icon: faTags, iconColor: "text-purple-600", href: "#", badge: "2 новых" },
-    { text: "Связаться с поддержкой", icon: faComments, iconColor: "text-yellow-600", href: "#" },
-];
-
-const deliveryTariffs = [
-    { name: "🚀 СвифтЛокал", description: "Самая быстрая доставка (от 30 до 90 минут).", priceInfo: "от 199 ₽", details: "+ 15 ₽/км после 1 км", color: "text-blue-700" },
-    { name: "🚲 ЭкоЛокал", description: "Стандартная доставка (в течение 2-4 часов или на след. день).", priceInfo: "от 99 ₽", details: "+ 10 ₽/км после 2 км", color: "text-green-700" },
-    { name: "💰 ХабСэйвер", description: "Бесплатная ЭкоЛокал доставка для заказов от 2000 ₽.", priceInfo: "0 ₽", details: "(при сумме заказа > 2000 ₽)", color: "text-purple-700" },
-    { name: "🏃 Самовывоз", description: "Заберите заказ самостоятельно у продавца.", priceInfo: "0 ₽", details: "", color: "text-orange-700" },
-];
-
+import { 
+  faMapMarkedAlt, 
+  faChevronRight,
+  faUserEdit,
+  faBell,
+  faShieldAlt,
+  faSignOutAlt
+} from '@fortawesome/free-solid-svg-icons';
+import { faCreditCard } from '@fortawesome/free-regular-svg-icons';
 
 const ProfileTab: React.FC = () => {
+  const [loading, setLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState('profile');
+
+  const profileLinks = [
+    { 
+      text: "Личные данные", 
+      icon: faUserEdit, 
+      iconColor: "text-blue-600",
+      bgColor: "bg-blue-50",
+      href: "#",
+      tab: 'profile'
+    },
+    { 
+      text: "Адреса доставки", 
+      icon: faMapMarkedAlt, 
+      iconColor: "text-green-600",
+      bgColor: "bg-green-50",
+      href: "#",
+      tab: 'addresses'
+    },
+    { 
+      text: "Способы оплаты", 
+      icon: faCreditCard, 
+      iconColor: "text-purple-600",
+      bgColor: "bg-purple-50",
+      href: "#",
+      tab: 'payments'
+    },
+    { 
+      text: "Уведомления", 
+      icon: faBell, 
+      iconColor: "text-yellow-600",
+      bgColor: "bg-yellow-50",
+      href: "#",
+      tab: 'notifications',
+      badge: "3 новых"
+    },
+    { 
+      text: "Безопасность", 
+      icon: faShieldAlt, 
+      iconColor: "text-red-600",
+      bgColor: "bg-red-50",
+      href: "#",
+      tab: 'security'
+    },
+  ];
+
+  const handleTabChange = (tab: string) => {
+    setLoading(true);
+    setActiveTab(tab);
+    setTimeout(() => setLoading(false), 300);
+  };
+
   return (
-    <div id="profile-tab" className="tab-content p-4">
-      <div className="flex items-center mb-6">
-        <Image src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8YXZhdGFyfGVufDB8fDB8fHww&auto=format&fit=crop&w=100&q=60" alt="Аватар" width={64} height={64} className="w-16 h-16 rounded-full mr-4 border-2 border-blue-200 object-cover" />
-        <div>
-          <h2 className="text-lg font-semibold text-gray-800">Алексей Петров</h2>
-          <p className="text-sm text-gray-500">+7 (912) 345-67-89</p>
+    <div className="p-4">
+      {loading && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-xl">
+            Загружаем данные...
+          </div>
         </div>
+      )}
+
+      <div className="flex flex-col items-center mb-8">
+        <div className="relative mb-4">
+          <Image 
+            src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8YXZhdGFyfGVufDB8fDB8fHww&auto=format&fit=crop&w=100&q=60" 
+            alt="Аватар" 
+            width={96} 
+            height={96} 
+            className="w-24 h-24 rounded-full border-4 border-white shadow-md object-cover"
+          />
+          <button className="absolute bottom-0 right-0 bg-blue-600 text-white p-2 rounded-full shadow-md hover:bg-blue-700 transition">
+            <FontAwesomeIcon icon={faUserEdit} className="w-4 h-4" />
+          </button>
+        </div>
+        <h2 className="text-xl font-bold text-gray-800">Алексей Петров</h2>
+        <p className="text-gray-500">+7 (912) 345-67-89</p>
       </div>
 
       <div className="space-y-3 mb-6">
         {profileLinks.map(link => (
-          <Link key={link.text} href={link.href}
-             className="flex items-center p-3 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 transition">
-            <FontAwesomeIcon icon={link.icon} className={`w-5 text-center ${link.iconColor} mr-3`} />
-            <span className="text-gray-700 flex-1">{link.text}</span>
+          <button
+            key={link.text}
+            onClick={() => handleTabChange(link.tab)}
+            className={`w-full flex items-center p-4 rounded-xl transition-all
+              ${link.bgColor} hover:shadow-md
+              ${activeTab === link.tab ? 'ring-2 ring-offset-2 ring-blue-500' : ''}`}
+          >
+            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${link.iconColor} ${link.bgColor} mr-4`}>
+              <FontAwesomeIcon icon={link.icon} className="w-5" />
+            </div>
+            <div className="flex-1 text-left">
+              <span className="font-medium text-gray-800">{link.text}</span>
+            </div>
             {link.badge && (
-              <span className="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full mr-2">{link.badge}</span>
+              <span className="text-xs bg-red-100 text-red-600 px-2 py-1 rounded-full mr-2">
+                {link.badge}
+              </span>
             )}
             <FontAwesomeIcon icon={faChevronRight} className="text-gray-400" />
-          </Link>
+          </button>
         ))}
       </div>
 
-      <div id="delivery-info" className="bg-white p-4 rounded-lg border border-blue-200 mb-6">
-        <h3 className="text-base font-semibold text-gray-800 mb-3">Наши тарифы доставки</h3>
-        <div className="space-y-3 text-sm">
-          {deliveryTariffs.map(tariff => (
-            <div key={tariff.name} className="border-b pb-2 last:border-b-0 last:pb-0">
-              <p className={`font-medium ${tariff.color}`}>{tariff.name}</p>
-              <p className="text-gray-600 text-xs">{tariff.description}</p>
-              <p className="text-gray-800 font-medium mt-1">
-                {tariff.priceInfo} {tariff.details && <span className="text-gray-500 font-normal">{tariff.details}</span>}
-              </p>
-            </div>
-          ))}
+      <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 mb-6">
+        <h3 className="text-lg font-bold text-gray-800 mb-4">Статистика</h3>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="bg-blue-50 p-3 rounded-lg">
+            <p className="text-sm text-gray-500">Заказов</p>
+            <p className="text-xl font-bold text-blue-600">12</p>
+          </div>
+          <div className="bg-green-50 p-3 rounded-lg">
+            <p className="text-sm text-gray-500">Покупок</p>
+            <p className="text-xl font-bold text-green-600">24</p>
+          </div>
+          <div className="bg-purple-50 p-3 rounded-lg">
+            <p className="text-sm text-gray-500">Отзывов</p>
+            <p className="text-xl font-bold text-purple-600">8</p>
+          </div>
+          <div className="bg-yellow-50 p-3 rounded-lg">
+            <p className="text-sm text-gray-500">Баллов</p>
+            <p className="text-xl font-bold text-yellow-600">1,240</p>
+          </div>
         </div>
-        <p className="text-xs text-gray-500 mt-4">*Точная стоимость рассчитывается при оформлении заказа и зависит от расстояния и спроса.</p>
       </div>
 
-      <button className="w-full text-center py-2 text-red-600 hover:text-red-800 text-sm">
+      <button 
+        className="w-full flex items-center justify-center py-3 px-4 text-red-600 hover:bg-red-50 rounded-xl transition"
+        onClick={() => setLoading(true)}
+      >
+        <FontAwesomeIcon icon={faSignOutAlt} className="mr-2" />
         Выйти из аккаунта
       </button>
     </div>
