@@ -1,26 +1,199 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* Custom styles from HTML */
+body {
+    font-family: 'Inter', sans-serif;
+    overflow-y: scroll; /* Always show scrollbar to prevent layout shift */
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+/* Стили для модального окна товара */
+.product-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: white;
+    z-index: 1000;
+    display: none; /* Controlled by React state */
+    overscroll-behavior: contain;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Класс для блокировки скролла body и компенсации ширины скроллбара */
+.no-scroll {
+    overflow: hidden;
+    padding-right: var(--scrollbar-width, 0px);
+}
+.product-modal.active { /* This class will be managed by React state now */
+    display: block;
+}
+.modal-close {
+    position: fixed; /* Consider moving to component style or making relative to modal */
+    top: 15px;
+    right: 15px;
+    width: 40px;
+    height: 40px;
+    background: rgba(0,0,0,0.5);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1001;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+}
+.modal-content {
+    padding: 20px;
+    padding-top: 60px; /* Space for close button if it's inside */
+    max-height: calc(100vh - 0px); /* Adjust if header/footer are outside modal scroll */
+    overflow-y: auto;
+}
+.modal-image {
+    width: 100%;
+    height: 300px;
+    object-fit: cover;
+    border-radius: 12px;
+    margin-bottom: 20px;
+}
+.active-tab { /* Handled by component logic now for NavigationBar */
+    /* color: #3b82f6; */ /* Tailwind: text-blue-600 */
+    /* transform: scale(1.1); */ /* Tailwind: scale-110 */
+}
+.tab-icon {
+    transition: transform 0.2s ease-in-out;
+}
+.item-card { /* Consider making this a @layer component in Tailwind */
+    transition: all 0.3s ease;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.06);
+    border: 1px solid #e5e7eb; /* Tailwind: border border-gray-200 */
+}
+.item-card:hover {
+    transform: translateY(-4px); /* Tailwind: hover:-translate-y-1 */
+    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05); /* Tailwind: hover:shadow-lg */
+}
+.category-chip {
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+}
+.category-chip.active {
+    background-color: #eff6ff; /* Tailwind: bg-blue-50 */
+    color: #2563eb; /* Tailwind: text-blue-700 */
+    border-color: #93c5fd; /* Tailwind: border-blue-300 */
+    font-weight: 500;
+}
+.search-input {
+    transition: all 0.3s ease;
+}
+.search-input:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); /* Tailwind: focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 */
+    background-color: white;
+}
+.skeleton {
+    animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: .5; }
+}
+.badge { /* Consider making this a component */
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    min-width: 18px;
+    height: 18px;
+    font-size: 10px; /* Tailwind: text-xs */
+    padding: 0 4px;
+}
+.provider-card {
+    transition: background-color 0.2s ease;
+}
+.provider-card:hover {
+    background-color: #f9fafb; /* Tailwind: hover:bg-gray-50 */
+}
+.gradient-banner {
+    background: linear-gradient(90deg, #3b82f6 0%, #6366f1 100%);
+}
+.tab-content { display: none; animation: fadeIn 0.4s ease-out; } /* Handled by React conditional rendering */
+.tab-content.active { display: block; }
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes head-shake {
+  0% { transform: translateX(0); }
+  12.5% { transform: translateX(-6px) rotateY(-5deg); }
+  37.5% { transform: translateX(5px) rotateY(4deg); }
+  62.5% { transform: translateX(-3px) rotateY(-2deg); }
+  87.5% { transform: translateX(2px) rotateY(1deg); }
+  100% { transform: translateX(0); }
+}
+.animate-head-shake { /* Can be applied with Tailwind or clsx */
+    animation: head-shake 0.7s ease-in-out;
+}
+
+/* Скрыть скроллбар для контейнеров с горизонтальной прокруткой */
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Компенсация сдвига для fixed/sticky элементов при скрытии скроллбара */
+body.no-scroll nav,
+body.no-scroll header {
+     padding-right: var(--scrollbar-width, 0px);
+}
+
+/* Base CSS Reset */
+*, *::before, *::after {
+  box-sizing: border-box;
+  /* margin: 0; */ /* Handled by Tailwind base */
+  /* padding: 0; */ /* Handled by Tailwind base */
+}
+
+html {
+  line-height: 1.5;
+  -webkit-text-size-adjust: 100%;
+  -moz-tab-size: 4;
+  tab-size: 4;
+  /* font-family set by Inter font in layout */
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  min-height: 100vh;
+  line-height: inherit;
+  /* background-color: #f8f9fa; */ /* Tailwind bg-gray-100 set in layout */
+  /* color: #212529; */ /* Tailwind text-gray-800 or similar */
+}
+
+img, picture, svg, video, canvas, audio, iframe, embed, object {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+input, button, textarea, select {
+  font: inherit;
+}
+
+p, h1, h2, h3, h4, h5, h6 {
+  overflow-wrap: break-word;
+}
+
+#root, #__next { /* Common root IDs */
+  isolation: isolate;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:focus-within {
+   scroll-behavior: auto;
+  }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
