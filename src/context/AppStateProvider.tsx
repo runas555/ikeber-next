@@ -66,10 +66,10 @@ const AppStateProvider: React.FC<AppStateProviderProps> = ({ children }) => {
   const [isSearchResultsOpen, setIsSearchResultsOpen] = useState<boolean>(defaultState.isSearchResultsOpen);
   const [searchQuery, setSearchQuery] = useState<string>(defaultState.searchQuery);
   
-  // Example counts, can be managed with more complex logic or API calls
-  const [notificationsCount, setNotificationsCount] = useState<number>(defaultState.notificationsCount);
-  const [favoritesCount, setFavoritesCount] = useState<number>(defaultState.favoritesCount);
-  const [ordersBadgeCount, setOrdersBadgeCount] = useState<number>(defaultState.ordersBadgeCount);
+  // Example counts
+  const [notificationsCount] = useState<number>(defaultState.notificationsCount);
+  const [favoritesCount] = useState<number>(defaultState.favoritesCount);
+  const [ordersBadgeCount] = useState<number>(defaultState.ordersBadgeCount);
 
   // Scrollbar width effect
   useEffect(() => {
@@ -117,6 +117,7 @@ const AppStateProvider: React.FC<AppStateProviderProps> = ({ children }) => {
   };
 
   const openCategoryItemsView = (categoryName: string) => {
+    console.log('Opening category view for:', categoryName);
     setCategoryForView(categoryName);
     setIsCategoryViewOpen(true);
   };
@@ -138,7 +139,7 @@ const AppStateProvider: React.FC<AppStateProviderProps> = ({ children }) => {
     setSearchQuery(''); // Clear query on close
   };
 
-  const handleSetActiveTab = (tabId: string) => {
+  const handleSetActiveTab: Dispatch<SetStateAction<string>> = (tabId) => {
     // Close all modals when switching tabs
     closeProductModal();
     closeCategoryItemsView();

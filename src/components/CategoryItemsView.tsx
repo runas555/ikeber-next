@@ -18,7 +18,7 @@ const CategoryItemsView: React.FC<CategoryItemsViewProps> = ({ categoryName, ite
   // The 'active' class logic would be managed there.
 
   return (
-    <div className="fixed top-0 left-0 right-0 bottom-0 bg-white z-50 transition-opacity duration-300 ease-in-out">
+    <div className="fixed top-0 left-0 right-0 bottom-0 bg-white z-50 transition-opacity duration-300 ease-in-out border-4 border-red-500">
       <div className="max-w-lg mx-auto bg-white flex flex-col shadow-lg h-full">
         <header className="bg-white py-3 px-4 sticky top-0 z-30 border-b border-gray-200 flex items-center justify-between">
           <h2 className="text-lg font-bold text-gray-800">Товары: {categoryName}</h2>

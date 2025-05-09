@@ -17,7 +17,6 @@ import { itemsData } from '@/data/items'; // Example data import
 export default function HomePage() {
   const {
     activeTab,
-    setActiveTab,
     isProductModalOpen,
     selectedProduct,
     isCategoryViewOpen,
@@ -100,6 +99,8 @@ export default function HomePage() {
       )}
 
       {isCategoryViewOpen && categoryForView && (
+        console.log('Rendering CategoryItemsView with:', categoryForView, 
+          'Items:', itemsData.filter(item => item.category === categoryForView)),
         <CategoryItemsView
           categoryName={categoryForView}
           items={itemsData.filter(item => item.category === categoryForView)}
