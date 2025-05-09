@@ -12,9 +12,53 @@ import ProductModal from '@/components/ProductModal';
 import SearchOverlay from '@/components/SearchOverlay';
 import SearchResultsContainer from '@/components/SearchResultsContainer';
 import { AppStateContext } from '@/context/AppStateProvider'; // To be created
-import { itemsData } from '@/data/items'; // Example data import
+// import { itemsData } from '@/data/items'; // Удаляем старый импорт
+
+// Определим тип Item здесь, так как он больше не импортируется из items.js
+// В идеале, этот тип должен совпадать со структурой данных из БД
+// и может быть вынесен в отдельный файл types.ts
+export interface Item {
+  id: number;
+  name: string;
+  category: string;
+  price: string;
+  image: string;
+  provider: string;
+  description: string;
+}
 
 export default function HomePage() {
+  const [products, setProducts] = React.useState<Item[]>([]);
+  const [isLoading, setIsLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        setIsLoading(true);
+        setError(null);
+        const response = await fetch('/api/products');
+        if (!response.ok) {
+          throw new Error(`Failed to fetch products: ${response.statusText}`);
+        }
+        const data = await response.json();
+        setProducts(data);
+      } catch (e: unknown) {
+        if (e instanceof Error) {
+          setError(e.message);
+        } else {
+          setError("An unknown error occurred");
+        }
+        console.error("Error fetching products:", e);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+
   const {
     activeTab,
     isProductModalOpen,
@@ -68,17 +112,25 @@ export default function HomePage() {
 
 
   const renderTabContent = () => {
+    if (isLoading) {
+      return <div className="p-4 text-center">Загрузка товаров...</div>;
+    }
+    if (error) {
+      return <div className="p-4 text-center text-red-500">Ошибка загрузки товаров: {error}</div>;
+    }
+
     switch (activeTab) {
       case 'home':
-        return <HomeTab items={itemsData} onProductClick={openProductModal} onCategoryLinkClick={openCategoryItemsView} />;
+        return <HomeTab items={products} onProductClick={openProductModal} onCategoryLinkClick={openCategoryItemsView} />;
       case 'categories':
+        // CategoriesTab использует свой внутренний список категорий
         return <CategoriesTab onCategoryClick={openCategoryItemsView} />;
       case 'orders':
         return <OrdersTab />;
       case 'profile':
         return <ProfileTab />;
       default:
-        return <HomeTab items={itemsData} onProductClick={openProductModal} onCategoryLinkClick={openCategoryItemsView} />;
+        return <HomeTab items={products} onProductClick={openProductModal} onCategoryLinkClick={openCategoryItemsView} />;
     }
   };
 
@@ -99,11 +151,11 @@ export default function HomePage() {
       )}
 
       {isCategoryViewOpen && categoryForView && (
-        console.log('Rendering CategoryItemsView with:', categoryForView, 
-          'Items:', itemsData.filter(item => item.category === categoryForView)),
+        // console.log('Rendering CategoryItemsView with:', categoryForView,
+        //   'Items:', products.filter(item => item.category === categoryForView)),
         <CategoryItemsView
           categoryName={categoryForView}
-          items={itemsData.filter(item => item.category === categoryForView)}
+          items={products.filter(item => item.category === categoryForView)}
           onClose={closeCategoryItemsView}
           onProductClick={openProductModal}
         />
