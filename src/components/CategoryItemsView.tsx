@@ -18,12 +18,12 @@ const CategoryItemsView: React.FC<CategoryItemsViewProps> = ({ categoryName, ite
   // The 'active' class logic would be managed there.
 
   return (
-    <div className="fixed top-0 left-0 right-0 bottom-0 bg-white z-50 transition-opacity duration-300 ease-in-out border-4 border-red-500">
-      <div className="max-w-lg mx-auto bg-white flex flex-col shadow-lg h-full">
+    <div className="fixed top-0 left-0 right-0 bottom-0 bg-white z-50 transition-opacity duration-300 ease-in-out">
+      <div className="w-full bg-white flex flex-col shadow-lg h-full">
         <header className="bg-white py-3 px-4 sticky top-0 z-30 border-b border-gray-200 flex items-center justify-between">
           <h2 className="text-lg font-bold text-gray-800">Товары: {categoryName}</h2>
-          <button onClick={onClose} className="text-gray-500 hover:text-red-500 p-2 -mr-2" aria-label="Закрыть просмотр категории">
-            <FontAwesomeIcon icon={faTimes} className="text-2xl" />
+          <button onClick={onClose} className="modal-close" aria-label="Закрыть просмотр категории">
+            <FontAwesomeIcon icon={faTimes} />
           </button>
         </header>
         <main className="flex-1 p-4 overflow-y-auto scrollbar-hide pb-20"> {/* Added pb-20 for potential nav overlap */}

@@ -43,8 +43,8 @@ const categories = [
   { 
     name: "Одежда и аксессуары", 
     icon: faTshirt,
-    color: "text-red-600",
-    bgColor: "bg-red-100"
+    color: "text-indigo-600",
+    bgColor: "bg-indigo-100"
   },
   { 
     name: "Книги и хобби", 
@@ -99,7 +99,7 @@ const CategoriesTab: React.FC<CategoriesTabProps> = ({ onCategoryClick }) => {
               flex flex-col items-center p-4 rounded-xl transition-all
               ${category.bgColor} ${category.color}
               hover:scale-105 hover:shadow-md
-              ${selectedCategory === category.name ? 'ring-2 ring-offset-2 ring-gray-400' : ''}
+              ${selectedCategory === category.name ? 'ring-2 ring-offset-2 ring-blue-200' : ''}
               ${loading ? 'opacity-70' : ''}
             `}
           >
