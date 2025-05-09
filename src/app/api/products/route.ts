@@ -7,7 +7,7 @@ const dbPath = path.join(process.cwd(), 'market.db');
 export async function GET() {
   console.log(`Attempting to connect to database at: ${dbPath}`);
 
-  return new Promise((resolve) => {
+  return new Promise<Response>((resolve) => { // Явно указываем тип Response для Promise
     const db = new sqlite3.Database(dbPath, sqlite3.OPEN_READONLY, (err) => {
       if (err) {
         console.error(`Error opening database at ${dbPath}:`, err.message);
