@@ -1,49 +1,64 @@
 "use client";
 import React, { useContext } from 'react';
+import { useRouter } from 'next/navigation'; // Импортируем useRouter
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faHome, faThLarge, faReceipt } from '@fortawesome/free-solid-svg-icons';
-import { faUserCircle } from '@fortawesome/free-regular-svg-icons';
-import { AppStateContext } from '@/context/AppStateProvider';
-import clsx from 'clsx';
+import { faHome, faThLarge, faListAlt, faUser } from '@fortawesome/free-solid-svg-icons';
+import { AppStateContext } from '@/context/AppStateProvider'; 
 
-const navItems = [
+const tabs = [
   { id: 'home', label: 'Главная', icon: faHome },
   { id: 'categories', label: 'Категории', icon: faThLarge },
-  { id: 'orders', label: 'Заказы', icon: faReceipt /* badgeCount: 1 */ }, // Example badge
-  { id: 'profile', label: 'Профиль', icon: faUserCircle },
+  { id: 'orders', label: 'Заказы', icon: faListAlt },
+  { id: 'profile', label: 'Профиль', icon: faUser },
 ];
 
 const NavigationBar: React.FC = () => {
-  const { activeTab, setActiveTab, ordersBadgeCount } = useContext(AppStateContext);
+  const router = useRouter(); // Инициализируем useRouter
+  const appState = useContext(AppStateContext);
 
-  const handleTabChange = (tabId: string) => {
-    // Logic to close any open modals/views before switching tabs
-    // This should ideally be centralized in AppStateProvider or a custom hook
-    // For now, just switch tab
-    setActiveTab(tabId);
+  if (!appState) {
+    console.warn("AppStateContext is not available in NavigationBar");
+    return null; 
+  }
+
+  const { activeTab, setActiveTab, ordersBadgeCount } = appState;
+
+  const handleTabClick = (tabId: string) => {
+    // Сначала переходим на главную страницу, если мы не на ней
+    // Проверка текущего пути может быть сложной из-за динамических сегментов.
+    // Проще всегда пушить '/', а setActiveTab обновит контент.
+    router.push('/'); 
+    
+    // Устанавливаем активную вкладку.
+    // Небольшая задержка может помочь, если HomePage не успевает среагировать на изменение activeTab
+    // после router.push. Но для начала попробуем без нее.
+    // setActiveTab(tabId);
+    // Для большей надежности, особенно если HomePage имеет сложный рендер:
+    requestAnimationFrame(() => {
+        setActiveTab(tabId);
+    });
   };
 
   return (
-    <nav className="bg-white border-t border-gray-200 fixed bottom-0 w-full py-1.5 z-40">
-      <div className="flex justify-around">
-        {navItems.map((item) => (
+    <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-top z-40">
+      <div className="flex justify-around max-w-screen-sm mx-auto">
+        {tabs.map((tab) => (
           <button
-            key={item.id}
-            className={clsx(
-              'tab-button flex-1 flex flex-col items-center px-3 py-1 transition-colors duration-200',
-              activeTab === item.id ? 'text-blue-600' : 'text-gray-500 hover:text-blue-500'
-            )}
-            onClick={() => handleTabChange(item.id)}
+            key={tab.id}
+            onClick={() => handleTabClick(tab.id)} // Используем новый обработчик
+            className={`flex-1 flex flex-col items-center justify-center py-2 px-1 text-xs transition-colors duration-200 ease-in-out
+                        ${activeTab === tab.id ? 'text-blue-600' : 'text-gray-500 hover:text-blue-500'}`}
+            aria-current={activeTab === tab.id ? 'page' : undefined}
           >
-            <FontAwesomeIcon icon={item.icon} className="tab-icon text-xl" />
-            {item.id === 'orders' && ordersBadgeCount > 0 && (
-                 <span className="badge bg-orange-500 text-white rounded-full flex items-center justify-center" style={{top: '-4px', right: 'calc(50% - 22px)'}}>
-                    {ordersBadgeCount}
-                 </span>
-            )}
-            <span className={clsx("text-xs mt-0.5", activeTab === item.id && "font-medium")}>
-              {item.label}
-            </span>
+            <div className="relative">
+              <FontAwesomeIcon icon={tab.icon} className={`text-xl mb-0.5 tab-icon ${activeTab === tab.id ? 'scale-110' : ''}`} />
+              {tab.id === 'orders' && ordersBadgeCount > 0 && (
+                <span className="absolute top-[-3px] right-[-7px] bg-red-500 text-white text-[9px] font-bold rounded-full h-4 w-4 flex items-center justify-center">
+                  {ordersBadgeCount}
+                </span>
+              )}
+            </div>
+            <span className="mt-0.5">{tab.label}</span>
           </button>
         ))}
       </div>

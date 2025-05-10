@@ -1,5 +1,6 @@
 "use client";
 import React from 'react';
+import Link from 'next/link'; // Импортируем Link
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faCouch, 
@@ -11,9 +12,10 @@ import {
   faHeartbeat
 } from '@fortawesome/free-solid-svg-icons';
 
-interface CategoriesTabProps {
-  onCategoryClick: (categoryName: string) => void;
-}
+// interface CategoriesTabProps больше не нужен, так как onCategoryClick удален
+// interface CategoriesTabProps {
+// onCategoryClick: (categoryName: string) => void;
+// }
 
 const categories = [
   { 
@@ -60,54 +62,33 @@ const categories = [
   },
 ];
 
-const CategoriesTab: React.FC<CategoriesTabProps> = ({ onCategoryClick }) => {
-  const [loading, setLoading] = React.useState(false);
-  const [selectedCategory, setSelectedCategory] = React.useState<string | null>(null);
-
-  const handleClick = (categoryName: string) => {
-    setLoading(true);
-    setSelectedCategory(categoryName);
-    
-    try {
-      onCategoryClick(categoryName);
-    } catch (error) {
-      console.error('Error opening category:', error);
-    } finally {
-      setTimeout(() => setLoading(false), 500);
-    }
-  };
+const CategoriesTab: React.FC = () => { // Удален CategoriesTabProps
+  // Состояния loading и selectedCategory больше не нужны
 
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold text-gray-800 mb-6">Категории товаров</h1>
       
-      {loading && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-xl">
-            Загружаем товары...
-          </div>
-        </div>
-      )}
+      {/* Индикатор загрузки больше не нужен здесь, так как переход на новую страницу */}
 
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         {categories.map((category) => (
-          <button
+          <Link
             key={category.name}
-            onClick={() => handleClick(category.name)}
-            disabled={loading}
+            href={`/category/${encodeURIComponent(category.name)}`}
+            passHref
             className={`
               flex flex-col items-center p-4 rounded-xl transition-all
               ${category.bgColor} ${category.color}
               hover:scale-105 hover:shadow-md
-              ${selectedCategory === category.name ? 'ring-2 ring-offset-2 ring-blue-200' : ''}
-              ${loading ? 'opacity-70' : ''}
+              focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-400 
             `}
           >
             <div className="w-12 h-12 flex items-center justify-center mb-3">
               <FontAwesomeIcon icon={category.icon} size="2x" />
             </div>
             <span className="font-medium text-center">{category.name}</span>
-          </button>
+          </Link>
         ))}
       </div>
     </div>

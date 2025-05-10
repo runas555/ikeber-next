@@ -5,7 +5,6 @@ import Header from '@/components/Header';
 import NavigationBar from '@/components/NavigationBar';
 import HomeTab from '@/components/tabs/HomeTab';
 import CategoriesTab from '@/components/tabs/CategoriesTab';
-import CategoryItemsView from '@/components/CategoryItemsView';
 import OrdersTab from '@/components/tabs/OrdersTab';
 import ProfileTab from '@/components/tabs/ProfileTab';
 // ProductModal больше не нужен здесь
@@ -20,16 +19,10 @@ export default function HomePage() {
   const {
     activeTab,
     // isProductModalOpen, selectedProduct, openProductModal, closeProductModal больше не нужны
-    isCategoryViewOpen,
-    categoryForView,
+    // isCategoryViewOpen, categoryForView, openCategoryItemsView, closeCategoryItemsView больше не нужны
     isSearchOverlayOpen,
     searchStatusText,
-    // isSearchResultsOpen, searchQuery, openSearchResults, closeSearchResults больше не нужны для SearchResultsContainer
-    // searchQuery и setSearchQuery все еще могут быть нужны для SearchOverlay
-    // searchQuery, // Больше не используется в этом файле
-    setSearchQuery, // Оставляем для SearchOverlay
-    openCategoryItemsView,
-    closeCategoryItemsView,
+    setSearchQuery, 
     openSearchOverlay,
     closeSearchOverlay,
     // openSearchResults, closeSearchResults удалены
@@ -70,15 +63,22 @@ export default function HomePage() {
   const renderTabContent = () => {
     switch (activeTab) {
       case 'home':
-        return <HomeTab items={itemsData} onCategoryLinkClick={openCategoryItemsView} />; // Удален onProductClick
+        // onCategoryLinkClick для HomeTab теперь должен вести на страницу категории, если это необходимо,
+        // либо эта логика должна быть пересмотрена. Пока что HomeTab не будет открывать категории.
+        // Если нужно, чтобы "Быстрые категории" на HomeTab вели на страницы категорий,
+        // HomeTab также нужно будет обновить для использования Link.
+        // Для MVP я оставлю HomeTab без этой функциональности, чтобы сфокусироваться на CategoriesTab.
+        // Если потребуется, можно будет добавить onCategoryLinkClick={(categoryName) => router.push(`/category/${encodeURIComponent(categoryName)}`)}
+        return <HomeTab items={itemsData} onCategoryLinkClick={(categoryName) => router.push(`/category/${encodeURIComponent(categoryName)}`)} />;
       case 'categories':
-        return <CategoriesTab onCategoryClick={openCategoryItemsView} />;
+        return <CategoriesTab />; // Больше не передаем onCategoryClick
       case 'orders':
         return <OrdersTab />;
       case 'profile':
         return <ProfileTab />;
       default:
-        return <HomeTab items={itemsData} onCategoryLinkClick={openCategoryItemsView} />; // Удален onProductClick
+        // Ветка default должна также использовать router.push для категорий
+        return <HomeTab items={itemsData} onCategoryLinkClick={(categoryName) => router.push(`/category/${encodeURIComponent(categoryName)}`)} />;
     }
   };
 
@@ -90,18 +90,7 @@ export default function HomePage() {
       </main>
       <NavigationBar />
 
-      {/* ProductModal больше не отображается здесь */}
-
-      {isCategoryViewOpen && categoryForView && (
-        console.log('Rendering CategoryItemsView with:', categoryForView, 
-          'Items:', itemsData.filter(item => item.category === categoryForView)),
-        <CategoryItemsView
-          categoryName={categoryForView}
-          items={itemsData.filter(item => item.category === categoryForView)}
-          onClose={closeCategoryItemsView}
-          // onProductClick={openProductModal} // Удален onProductClick
-        />
-      )}
+      {/* ProductModal и CategoryItemsView больше не отображаются здесь */}
 
       {isSearchOverlayOpen && (
         <SearchOverlay isOpen={isSearchOverlayOpen} statusText={searchStatusText} />
