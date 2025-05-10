@@ -1,3 +1,5 @@
+import usersFromFile from './users.json';
+
 export interface User {
   id: number;
   username: string;
@@ -6,12 +8,10 @@ export interface User {
   // Другие поля пользователя, если необходимо
 }
 
-export const usersData: User[] = [
-  {
-    id: 1,
-    username: "testuser",
-    password: "password123", // В реальном приложении пароли должны быть хешированы
-    email: "testuser@example.com"
-  },
-  // Можно добавить других пользователей
-];
+export let usersData: User[] = usersFromFile;
+
+// Функция для обновления usersData в памяти, если это потребуется где-то еще,
+// хотя основное обновление будет через перезапись файла и перезагрузку данных.
+export const updateUserInMemory = (newUsers: User[]) => {
+  usersData = newUsers;
+};

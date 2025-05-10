@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useContext } from 'react';
 import { AppStateContext } from '@/context/AppStateProvider';
-import { usersData, User } from '@/data/users'; // Импортируем данные пользователей и тип User
+import { User } from '@/data/users'; // Импортируем тип User, usersData больше не нужен для проверок здесь
 
 interface RegistrationFormProps {
   onSwitchToLogin: () => void; // Функция для переключения на форму входа
@@ -14,52 +14,58 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSwitchToLogin }) 
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setSuccess('');
+    setIsLoading(true);
 
     if (!username.trim() || !password.trim() || !email.trim()) {
       setError('Все поля обязательны для заполнения');
+      setIsLoading(false);
       return;
     }
 
-    // Проверка, существует ли пользователь с таким именем
-    if (usersData.find((u) => u.username === username)) {
-      setError('Пользователь с таким именем уже существует');
-      return;
+    try {
+      const response = await fetch('/api/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password, email }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.message || 'Ошибка регистрации. Попробуйте еще раз.');
+      } else {
+        // Пароль не должен храниться в currentUser в состоянии приложения
+        const registeredUser = data.user as User; // Утверждаем тип пользователя из ответа
+        const userToSetAsCurrent = { ...registeredUser };
+        delete userToSetAsCurrent.password; // Удаляем свойство password из копии
+
+        setCurrentUser(userToSetAsCurrent);
+        setSuccess(data.message || 'Регистрация прошла успешно! Вы вошли в систему.');
+        
+        // Очистка формы
+        setUsername('');
+        setPassword('');
+        setEmail('');
+
+        // Через некоторое время перенаправляем на вкладку профиля
+        setTimeout(() => {
+            setActiveTab('profile');
+        }, 1500);
+      }
+    } catch (err) {
+      console.error('Registration request failed:', err);
+      setError('Не удалось подключиться к серверу. Пожалуйста, проверьте ваше соединение.');
+    } finally {
+      setIsLoading(false);
     }
-    
-    // Проверка, существует ли пользователь с таким email
-    if (usersData.find((u) => u.email === email)) {
-      setError('Пользователь с таким email уже существует');
-      return;
-    }
-
-    // В MVP мы просто добавляем пользователя в массив usersData.
-    // В реальном приложении здесь будет запрос к API.
-    const newUser: User = {
-      id: usersData.length > 0 ? Math.max(...usersData.map(u => u.id)) + 1 : 1, // Генерируем новый ID
-      username,
-      password, // Пароль должен хешироваться в реальном приложении
-      email,
-    };
-    usersData.push(newUser); // ВАЖНО: Это изменение будет только на клиенте и сбросится при перезагрузке.
-                           // Для сохранения данных нужна база данных или localStorage.
-
-    setCurrentUser(newUser);
-    setSuccess('Регистрация прошла успешно! Вы вошли в систему.');
-    
-    // Очистка формы
-    setUsername('');
-    setPassword('');
-    setEmail('');
-
-    // Через некоторое время перенаправляем на вкладку профиля
-    setTimeout(() => {
-        setActiveTab('profile');
-    }, 1500);
   };
 
   return (
@@ -78,6 +84,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSwitchToLogin }) 
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             required
+            disabled={isLoading}
           />
         </div>
         <div className="mb-4">
@@ -92,6 +99,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSwitchToLogin }) 
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
+            disabled={isLoading}
           />
         </div>
         <div className="mb-6">
@@ -106,6 +114,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSwitchToLogin }) 
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
+            disabled={isLoading}
           />
         </div>
         {error && <p className="text-red-500 text-xs italic mb-4">{error}</p>}
@@ -114,13 +123,15 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSwitchToLogin }) 
           <button
             className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full mb-3"
             type="submit"
+            disabled={isLoading}
           >
-            Зарегистрироваться
+            {isLoading ? 'Регистрация...' : 'Зарегистрироваться'}
           </button>
           <button
             type="button"
             onClick={onSwitchToLogin}
             className="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800"
+            disabled={isLoading}
           >
             Уже есть аккаунт? Войти
           </button>
