@@ -45,7 +45,27 @@ const ProductCard: React.FC<ProductCardProps> = ({ item, onAddToCart, className 
         <h3 className="font-semibold text-sm text-gray-800 truncate" title={item.name}>{item.name}</h3>
         <p className="text-xs text-gray-500 mt-0.5 truncate" title={item.provider}>{item.provider}</p>
         <div className="flex justify-between items-center mt-2">
-          <span className="font-bold text-blue-600">{item.price}</span>
+          <div className="flex items-baseline whitespace-nowrap">
+            <span className="font-bold text-blue-600">{item.price}</span>
+            {item.discount && (
+              <>
+                <span className="text-xs text-gray-500 line-through ml-2">
+                  {(() => {
+                    const currentPrice = parseFloat(item.price.replace(/[^0-9.-]+/g,""));
+                    const discountPercentage = parseFloat(item.discount.replace(/[^0-9.-]+/g,""));
+                    if (!isNaN(currentPrice) && !isNaN(discountPercentage) && discountPercentage > 0 && discountPercentage < 100) {
+                      const oldPrice = currentPrice / (1 - discountPercentage / 100);
+                      return `${Math.round(oldPrice)} ₽`;
+                    }
+                    return '';
+                  })()}
+                </span>
+                <span className="text-xs text-red-500 ml-1 bg-red-100 px-1 rounded">
+                  -{item.discount}
+                </span>
+              </>
+            )}
+          </div>
           <button
             className="add-to-cart-btn text-blue-500 hover:text-blue-700 p-1"
             onClick={handleAddToCartClick}
