@@ -71,17 +71,17 @@ const Header: React.FC<HeaderProps> = ({ onSearch, showBackButton = false }) => 
         {/* Правая часть: Только иконки действий */}
         <div className="flex items-center space-x-2">
           <button className="text-gray-500 hover:text-blue-600 relative p-1">
-            <FontAwesomeIcon icon={faHeart} className="text-xl" />
+            <FontAwesomeIcon icon={faHeart} className="text-lg" /> {/* Уменьшен размер иконки */}
             {favoritesCount > 0 && (
-              <span className="badge-sm bg-red-500 text-white rounded-full flex items-center justify-center">
+              <span className="badge bg-red-500 text-white rounded-full flex items-center justify-center"> {/* Используем класс badge */}
                 {favoritesCount}
               </span>
             )}
           </button>
           <button className="text-gray-500 hover:text-blue-600 relative p-1">
-            <FontAwesomeIcon icon={faBell} className="text-xl" />
+            <FontAwesomeIcon icon={faBell} className="text-lg" /> {/* Уменьшен размер иконки */}
             {notificationsCount > 0 && (
-               <span className="badge-sm bg-blue-500 text-white rounded-full flex items-center justify-center">
+               <span className="badge bg-blue-500 text-white rounded-full flex items-center justify-center"> {/* Используем класс badge */}
                 {notificationsCount}
                </span>
             )}
