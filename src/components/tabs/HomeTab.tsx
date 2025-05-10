@@ -11,7 +11,7 @@ import ProductCard from '@/components/ProductCard'; // Reusable ProductCard
 
 interface HomeTabProps {
   items: Item[];
-  onProductClick: (item: Item) => void;
+  // onProductClick больше не нужен
   onCategoryLinkClick: (categoryName: string) => void; // For "Что ищем сегодня?"
 }
 
@@ -35,7 +35,7 @@ const nearbyProviders = [
 ];
 
 
-const HomeTab: React.FC<HomeTabProps> = ({ items, onProductClick, onCategoryLinkClick }) => {
+const HomeTab: React.FC<HomeTabProps> = ({ items, onCategoryLinkClick }) => {
   const recommendedItemsPlaceholders = [ // Replace with actual item IDs or full item objects if needed
     items.find(i => i.id === 1),
     items.find(i => i.category === "Ремонт и услуги"), // Example: find a service
@@ -101,7 +101,7 @@ const HomeTab: React.FC<HomeTabProps> = ({ items, onProductClick, onCategoryLink
         </div>
         <div className="grid grid-cols-2 gap-3">
           {recommendedItemsPlaceholders.map((item) => (
-            <ProductCard key={item.id} item={item} onClick={onProductClick} />
+            <ProductCard key={item.id} item={item} />
           ))}
         </div>
       </div>

@@ -1,18 +1,18 @@
 "use client";
 import React, { createContext, useState, useEffect, ReactNode, Dispatch, SetStateAction } from 'react';
-import { Item } from '@/data/items'; // Ensure Item type is defined
+// Item is no longer used here
 
 // Define the shape of your context state
 interface AppState {
   activeTab: string;
-  isProductModalOpen: boolean;
-  selectedProduct: Item | null;
+  // isProductModalOpen and selectedProduct are no longer needed
   isCategoryViewOpen: boolean;
   categoryForView: string | null;
   isSearchOverlayOpen: boolean;
   searchStatusText: string;
-  isSearchResultsOpen: boolean;
-  searchQuery: string;
+  // isSearchResultsOpen and searchQuery are no longer needed for SearchResultsContainer
+  // searchQuery is still needed for SearchOverlay
+  searchQuery: string; // Оставляем для SearchOverlay
   notificationsCount: number; // Example
   favoritesCount: number;    // Example
   ordersBadgeCount: number;  // Example
@@ -21,29 +21,26 @@ interface AppState {
 // Define the shape of your context value (state + setters)
 interface AppContextValue extends AppState {
   setActiveTab: Dispatch<SetStateAction<string>>;
-  openProductModal: (item: Item) => void;
-  closeProductModal: () => void;
+  // openProductModal and closeProductModal are no longer needed
   openCategoryItemsView: (categoryName: string) => void;
   closeCategoryItemsView: () => void;
   openSearchOverlay: () => void;
   closeSearchOverlay: () => void;
-  openSearchResults: (query: string) => void;
-  closeSearchResults: () => void;
-  setSearchQuery: Dispatch<SetStateAction<string>>;
+  // openSearchResults and closeSearchResults are no longer needed
+  setSearchQuery: Dispatch<SetStateAction<string>>; // Все еще используется для SearchOverlay
   setSearchStatusText: Dispatch<SetStateAction<string>>;
   // Add more setters or actions as needed
 }
 
 const defaultState: AppState = {
   activeTab: 'home',
-  isProductModalOpen: false,
-  selectedProduct: null,
+  // isProductModalOpen and selectedProduct are no longer needed
   isCategoryViewOpen: false,
   categoryForView: null,
   isSearchOverlayOpen: false,
   searchStatusText: 'Анализирую ваш запрос...',
-  isSearchResultsOpen: false,
-  searchQuery: '',
+  // isSearchResultsOpen: false, // Больше не нужно
+  searchQuery: '', // Все еще используется для SearchOverlay
   notificationsCount: 2, // Sample data
   favoritesCount: 0,   // Sample data
   ordersBadgeCount: 0,    // Sample data
@@ -57,14 +54,13 @@ interface AppStateProviderProps {
 
 const AppStateProvider: React.FC<AppStateProviderProps> = ({ children }) => {
   const [activeTab, setActiveTab] = useState<string>(defaultState.activeTab);
-  const [isProductModalOpen, setIsProductModalOpen] = useState<boolean>(defaultState.isProductModalOpen);
-  const [selectedProduct, setSelectedProduct] = useState<Item | null>(defaultState.selectedProduct);
+  // isProductModalOpen and selectedProduct states are no longer needed
   const [isCategoryViewOpen, setIsCategoryViewOpen] = useState<boolean>(defaultState.isCategoryViewOpen);
   const [categoryForView, setCategoryForView] = useState<string | null>(defaultState.categoryForView);
   const [isSearchOverlayOpen, setIsSearchOverlayOpen] = useState<boolean>(defaultState.isSearchOverlayOpen);
   const [searchStatusText, setSearchStatusText] = useState<string>(defaultState.searchStatusText);
-  const [isSearchResultsOpen, setIsSearchResultsOpen] = useState<boolean>(defaultState.isSearchResultsOpen);
-  const [searchQuery, setSearchQuery] = useState<string>(defaultState.searchQuery);
+  // const [isSearchResultsOpen, setIsSearchResultsOpen] = useState<boolean>(defaultState.isSearchResultsOpen); // Больше не нужно
+  const [searchQuery, setSearchQuery] = useState<string>(defaultState.searchQuery); // Все еще используется для SearchOverlay
   
   // Example counts
   const [notificationsCount] = useState<number>(defaultState.notificationsCount);
@@ -78,22 +74,22 @@ const AppStateProvider: React.FC<AppStateProviderProps> = ({ children }) => {
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape' || event.key === 'Tab') { // Tab also closes modals as per original HTML
-        if (isProductModalOpen) closeProductModal();
-        else if (isCategoryViewOpen) closeCategoryItemsView();
-        else if (isSearchResultsOpen) closeSearchResults();
+        // if (isProductModalOpen) closeProductModal(); // No longer needed
+        if (isCategoryViewOpen) closeCategoryItemsView();
+        // else if (isSearchResultsOpen) closeSearchResults(); // No longer needed
         // Search overlay might not need esc/tab close or handled differently
       }
     };
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [isProductModalOpen, isCategoryViewOpen, isSearchResultsOpen]); // Re-add listener if dependencies change
+  }, [isCategoryViewOpen]); // Removed isSearchResultsOpen from dependencies
 
   const manageBodyScroll = (shouldLock: boolean) => {
     if (shouldLock) {
       document.body.classList.add('no-scroll');
     } else {
       // Only remove no-scroll if no other modal is active
-      if (!isProductModalOpen && !isCategoryViewOpen && !isSearchResultsOpen && !isSearchOverlayOpen) {
+      if (!isCategoryViewOpen && !isSearchOverlayOpen) { // Removed isSearchResultsOpen
          document.body.classList.remove('no-scroll');
       }
     }
@@ -101,20 +97,11 @@ const AppStateProvider: React.FC<AppStateProviderProps> = ({ children }) => {
   
   // Update body scroll whenever a modal's state changes
   useEffect(() => {
-    manageBodyScroll(isProductModalOpen || isCategoryViewOpen || isSearchResultsOpen || isSearchOverlayOpen);
-  }, [isProductModalOpen, isCategoryViewOpen, isSearchResultsOpen, isSearchOverlayOpen]);
+    manageBodyScroll(isCategoryViewOpen || isSearchOverlayOpen); // Removed isSearchResultsOpen
+  }, [isCategoryViewOpen, isSearchOverlayOpen]); // Removed isSearchResultsOpen
 
 
-  const openProductModal = (item: Item) => {
-    // Close other modals if necessary
-    if (isCategoryViewOpen) setIsCategoryViewOpen(false); // Example: Close category view if opening product from it
-    setSelectedProduct(item);
-    setIsProductModalOpen(true);
-  };
-  const closeProductModal = () => {
-    setIsProductModalOpen(false);
-    setSelectedProduct(null);
-  };
+  // openProductModal and closeProductModal are no longer needed
 
   const openCategoryItemsView = (categoryName: string) => {
     console.log('Opening category view for:', categoryName);
@@ -127,24 +114,19 @@ const AppStateProvider: React.FC<AppStateProviderProps> = ({ children }) => {
   };
 
   const openSearchOverlay = () => setIsSearchOverlayOpen(true);
-  const closeSearchOverlay = () => setIsSearchOverlayOpen(false);
+  const closeSearchOverlay = () => {
+    setIsSearchOverlayOpen(false);
+    // setSearchQuery(''); // Можно очищать searchQuery здесь, если SearchOverlay его меняет и он больше не нужен
+  }
 
-  const openSearchResults = (query: string) => {
-    setSearchQuery(query); // Ensure query is set for the results container
-    setIsSearchResultsOpen(true);
-    closeSearchOverlay(); // Close loading overlay when results are ready
-  };
-  const closeSearchResults = () => {
-    setIsSearchResultsOpen(false);
-    setSearchQuery(''); // Clear query on close
-  };
+  // openSearchResults and closeSearchResults are no longer needed
 
   const handleSetActiveTab: Dispatch<SetStateAction<string>> = (tabId) => {
     // Close all modals when switching tabs
-    closeProductModal();
+    // closeProductModal(); // No longer needed
     closeCategoryItemsView();
     closeSearchOverlay(); // Also close search processing
-    closeSearchResults();
+    // closeSearchResults(); // No longer needed
     setActiveTab(tabId);
     // Scroll to top of new tab content
     // This is tricky from context, page.tsx might handle its own main scroll area
@@ -157,27 +139,24 @@ const AppStateProvider: React.FC<AppStateProviderProps> = ({ children }) => {
 
   const value: AppContextValue = {
     activeTab,
-    isProductModalOpen,
-    selectedProduct,
+    // isProductModalOpen and selectedProduct are no longer needed
     isCategoryViewOpen,
     categoryForView,
     isSearchOverlayOpen,
     searchStatusText,
-    isSearchResultsOpen,
-    searchQuery,
+    // isSearchResultsOpen is no longer needed
+    searchQuery, // Still needed for SearchOverlay
     notificationsCount,
     favoritesCount,
     ordersBadgeCount,
     setActiveTab: handleSetActiveTab, // Use wrapped setter
-    openProductModal,
-    closeProductModal,
+    // openProductModal and closeProductModal are no longer needed
     openCategoryItemsView,
     closeCategoryItemsView,
     openSearchOverlay,
     closeSearchOverlay,
-    openSearchResults,
-    closeSearchResults,
-    setSearchQuery,
+    // openSearchResults and closeSearchResults are no longer needed
+    setSearchQuery, // Still needed for SearchOverlay
     setSearchStatusText,
   };
 

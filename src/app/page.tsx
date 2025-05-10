@@ -8,32 +8,31 @@ import CategoriesTab from '@/components/tabs/CategoriesTab';
 import CategoryItemsView from '@/components/CategoryItemsView';
 import OrdersTab from '@/components/tabs/OrdersTab';
 import ProfileTab from '@/components/tabs/ProfileTab';
-import ProductModal from '@/components/ProductModal';
+// ProductModal больше не нужен здесь
 import SearchOverlay from '@/components/SearchOverlay';
-import SearchResultsContainer from '@/components/SearchResultsContainer';
+// SearchResultsContainer больше не нужен здесь
 import { AppStateContext } from '@/context/AppStateProvider'; // To be created
 import { itemsData } from '@/data/items'; // Example data import
+import { useRouter } from 'next/navigation'; // Импортируем useRouter
 
 export default function HomePage() {
+  const router = useRouter(); // Инициализируем useRouter
   const {
     activeTab,
-    isProductModalOpen,
-    selectedProduct,
+    // isProductModalOpen, selectedProduct, openProductModal, closeProductModal больше не нужны
     isCategoryViewOpen,
     categoryForView,
     isSearchOverlayOpen,
     searchStatusText,
-    isSearchResultsOpen,
-    searchQuery,
-    openProductModal,
-    closeProductModal,
+    // isSearchResultsOpen, searchQuery, openSearchResults, closeSearchResults больше не нужны для SearchResultsContainer
+    // searchQuery и setSearchQuery все еще могут быть нужны для SearchOverlay
+    // searchQuery, // Больше не используется в этом файле
+    setSearchQuery, // Оставляем для SearchOverlay
     openCategoryItemsView,
     closeCategoryItemsView,
     openSearchOverlay,
     closeSearchOverlay,
-    openSearchResults,
-    closeSearchResults,
-    setSearchQuery,
+    // openSearchResults, closeSearchResults удалены
     setSearchStatusText,
   } = useContext(AppStateContext);
 
@@ -59,7 +58,8 @@ export default function HomePage() {
             step++;
         } else {
             closeSearchOverlay();
-            openSearchResults(query); // Pass query to results
+            // openSearchResults(query); // Больше не открываем модальное окно
+            router.push(`/search-request/${encodeURIComponent(query)}`); // Переходим на новую страницу
         }
     }
     setSearchStatusText('Анализирую ваш запрос: "' + query + '"...');
@@ -70,7 +70,7 @@ export default function HomePage() {
   const renderTabContent = () => {
     switch (activeTab) {
       case 'home':
-        return <HomeTab items={itemsData} onProductClick={openProductModal} onCategoryLinkClick={openCategoryItemsView} />;
+        return <HomeTab items={itemsData} onCategoryLinkClick={openCategoryItemsView} />; // Удален onProductClick
       case 'categories':
         return <CategoriesTab onCategoryClick={openCategoryItemsView} />;
       case 'orders':
@@ -78,7 +78,7 @@ export default function HomePage() {
       case 'profile':
         return <ProfileTab />;
       default:
-        return <HomeTab items={itemsData} onProductClick={openProductModal} onCategoryLinkClick={openCategoryItemsView} />;
+        return <HomeTab items={itemsData} onCategoryLinkClick={openCategoryItemsView} />; // Удален onProductClick
     }
   };
 
@@ -90,13 +90,7 @@ export default function HomePage() {
       </main>
       <NavigationBar />
 
-      {isProductModalOpen && selectedProduct && (
-        <ProductModal
-          product={selectedProduct}
-          isOpen={isProductModalOpen}
-          onClose={closeProductModal}
-        />
-      )}
+      {/* ProductModal больше не отображается здесь */}
 
       {isCategoryViewOpen && categoryForView && (
         console.log('Rendering CategoryItemsView with:', categoryForView, 
@@ -105,7 +99,7 @@ export default function HomePage() {
           categoryName={categoryForView}
           items={itemsData.filter(item => item.category === categoryForView)}
           onClose={closeCategoryItemsView}
-          onProductClick={openProductModal}
+          // onProductClick={openProductModal} // Удален onProductClick
         />
       )}
 
@@ -113,13 +107,7 @@ export default function HomePage() {
         <SearchOverlay isOpen={isSearchOverlayOpen} statusText={searchStatusText} />
       )}
 
-      {isSearchResultsOpen && (
-        <SearchResultsContainer
-          isOpen={isSearchResultsOpen}
-          onClose={closeSearchResults}
-          query={searchQuery}
-        />
-      )}
+      {/* SearchResultsContainer больше не отображается здесь */}
     </>
   );
 }

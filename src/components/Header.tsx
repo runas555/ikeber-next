@@ -1,19 +1,23 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react'; // useContext был здесь, но не использовался напрямую в useState
 import Image from 'next/image';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faMapMarkerAlt, faChevronDown, faSearch } from '@fortawesome/free-solid-svg-icons';
+import { faMapMarkerAlt, faChevronDown, faSearch, faArrowLeft } from '@fortawesome/free-solid-svg-icons'; // Добавлена faArrowLeft
 import { faHeart, faBell } from '@fortawesome/free-regular-svg-icons';
-import { AppStateContext } from '@/context/AppStateProvider'; // Assuming context exists
-import { useContext } from 'react';
+import { AppStateContext } from '@/context/AppStateProvider';
+import { useRouter } from 'next/navigation'; // Импорт useRouter
 
 interface HeaderProps {
   onSearch: (query: string) => void;
+  showBackButton?: boolean; // Новый опциональный пропс
 }
 
-const Header: React.FC<HeaderProps> = ({ onSearch }) => {
+const Header: React.FC<HeaderProps> = ({ onSearch, showBackButton = false }) => { // Значение по умолчанию для showBackButton
+  const router = useRouter(); // Инициализация router
   const [searchQuery, setSearchQuery] = useState('');
-  const { notificationsCount, favoritesCount } = useContext(AppStateContext); // Example from context
+  const appState = useContext(AppStateContext); // Используем appState, чтобы избежать ошибки, если контекст null
+  const notificationsCount = appState ? appState.notificationsCount : 0;
+  const favoritesCount = appState ? appState.favoritesCount : 0;
 
   const handleSearchSubmit = () => {
     onSearch(searchQuery);
@@ -30,12 +34,19 @@ const Header: React.FC<HeaderProps> = ({ onSearch }) => {
     <header className="bg-white py-3 px-4 sticky top-0 z-30 border-b border-gray-200">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center space-x-2">
+          {showBackButton && (
+            <button onClick={() => router.back()} className="text-gray-600 hover:text-blue-600 p-2 -ml-2">
+              <FontAwesomeIcon icon={faArrowLeft} className="text-xl" />
+            </button>
+          )}
           <Image src="/ikeber.svg" alt="Local Hub Logo" width={24} height={24} className="text-blue-600" />
-          <button className="flex items-center text-xs text-gray-500 hover:text-blue-600 ml-3">
-            <FontAwesomeIcon icon={faMapMarkerAlt} className="mr-1 text-red-500" />
-            <span>Екатеринбург</span>
-            <FontAwesomeIcon icon={faChevronDown} className="text-xs ml-1" />
-          </button>
+          {!showBackButton && ( // Показываем кнопку города только если нет кнопки "Назад"
+            <button className="flex items-center text-xs text-gray-500 hover:text-blue-600 ml-3">
+              <FontAwesomeIcon icon={faMapMarkerAlt} className="mr-1 text-red-500" />
+              <span>Екатеринбург</span>
+              <FontAwesomeIcon icon={faChevronDown} className="text-xs ml-1" />
+            </button>
+          )}
         </div>
         <div className="flex items-center space-x-4">
           <button className="text-gray-500 hover:text-blue-600 relative">

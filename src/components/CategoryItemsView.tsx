@@ -9,10 +9,10 @@ interface CategoryItemsViewProps {
   categoryName: string;
   items: Item[];
   onClose: () => void;
-  onProductClick: (item: Item) => void;
+  // onProductClick больше не нужен
 }
 
-const CategoryItemsView: React.FC<CategoryItemsViewProps> = ({ categoryName, items, onClose, onProductClick }) => {
+const CategoryItemsView: React.FC<CategoryItemsViewProps> = ({ categoryName, items, onClose }) => {
   // This component is now a modal-like view, not a full tab.
   // Parent (HomePage) controls its visibility via 'isOpen' prop.
   // The 'active' class logic would be managed there.
@@ -32,7 +32,7 @@ const CategoryItemsView: React.FC<CategoryItemsViewProps> = ({ categoryName, ite
           ) : (
             <div className="grid grid-cols-2 gap-4">
               {items.map(item => (
-                <ProductCard key={item.id} item={item} onClick={onProductClick} />
+                <ProductCard key={item.id} item={item} /> // Удален onClick
               ))}
             </div>
           )}

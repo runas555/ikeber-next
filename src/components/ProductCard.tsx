@@ -1,27 +1,20 @@
 "use client";
 import React from 'react';
 import Image from 'next/image';
+import Link from 'next/link'; // Импортируем Link
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCartPlus } from '@fortawesome/free-solid-svg-icons';
 import { Item } from '@/data/items'; // Assuming Item type
 
 interface ProductCardProps {
   item: Item;
-  onClick?: (item: Item) => void; // For opening modal
+  // onClick больше не нужен, так как мы используем Link
   onAddToCart?: (item: Item) => void; // For adding to cart
   className?: string;
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({ item, onClick, onAddToCart, className }) => {
-  const handleCardClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    // Prevent click if target is the add to cart button
-    if ((e.target as HTMLElement).closest('button.add-to-cart-btn')) {
-      return;
-    }
-    if (onClick) {
-      onClick(item);
-    }
-  };
+const ProductCard: React.FC<ProductCardProps> = ({ item, onAddToCart, className }) => {
+  // handleCardClick больше не нужен
 
   const handleAddToCartClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation(); // Prevent card click event
@@ -33,14 +26,14 @@ const ProductCard: React.FC<ProductCardProps> = ({ item, onClick, onAddToCart, c
   };
 
   return (
-    <div
-      className={`item-card bg-white rounded-lg overflow-hidden ${onClick ? 'cursor-pointer' : ''} ${className}`}
-      onClick={onClick ? handleCardClick : undefined}
-      data-item-id={item.id}
-    >
-      <div className="relative w-full h-32"> {/* Container for Image */}
-        <Image
-          src={item.image}
+    <Link href={`/products/${item.id}`} passHref>
+      <div
+        className={`item-card bg-white rounded-lg overflow-hidden cursor-pointer ${className}`} // cursor-pointer теперь всегда
+        data-item-id={item.id}
+      >
+        <div className="relative w-full h-32"> {/* Container for Image */}
+          <Image
+            src={item.image}
           alt={item.name}
           fill
           sizes="(max-width: 768px) 50vw, 200px" // Adjust sizes
@@ -63,6 +56,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ item, onClick, onAddToCart, c
         </div>
       </div>
     </div>
+    </Link>
   );
 };
 
