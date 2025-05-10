@@ -14,31 +14,49 @@ const CategoryPage: React.FC = () => {
 
   const { setSearchQuery, openSearchOverlay, closeSearchOverlay, setSearchStatusText } = useContext(AppStateContext);
 
+  const performLocalSearch = (query: string) => {
+    if (!query.trim()) return [];
+    const lowerCaseQuery = query.toLowerCase();
+    return itemsData.filter(item => 
+      item.name.toLowerCase().includes(lowerCaseQuery) ||
+      item.category.toLowerCase().includes(lowerCaseQuery) ||
+      item.provider.toLowerCase().includes(lowerCaseQuery) ||
+      item.description.toLowerCase().includes(lowerCaseQuery)
+    );
+  };
+
   const handleHeaderSearch = (query: string) => {
-    if (!query) {
+    if (!query.trim()) {
       console.warn("Search query is empty");
       return;
     }
     setSearchQuery(query);
-    openSearchOverlay();
-    let step = 0;
-    const searchSteps = [
-      { text: "Проверяю наличие у ближайших продавцов...", delay: 1200 },
-      { text: "Ищу похожие товары и услуги в вашем городе...", delay: 1500 },
-      { text: "Подбираю лучшие варианты для вас...", delay: 1300 }
-    ];
-    function nextStep() {
-      if (step < searchSteps.length) {
-        setSearchStatusText(searchSteps[step].text);
-        setTimeout(nextStep, searchSteps[step].delay);
-        step++;
-      } else {
-        closeSearchOverlay();
-        router.push(`/search-request/${encodeURIComponent(query)}`);
-      }
+
+    const localResults = performLocalSearch(query);
+
+    if (localResults.length > 0) {
+      router.push(`/search/${encodeURIComponent(query)}`);
+    } else {
+      const searchSteps = [
+        { text: "Проверяю наличие у ближайших продавцов...", delay: 1200 },
+        { text: "Ищу похожие товары и услуги в вашем городе...", delay: 1500 },
+        { text: "Подбираю лучшие варианты для вас...", delay: 1300 }
+      ];
+      let step = 0;
+      const nextStep = () => {
+        if (step < searchSteps.length) {
+          setSearchStatusText(searchSteps[step].text);
+          setTimeout(nextStep, searchSteps[step].delay);
+          step++;
+        } else {
+          closeSearchOverlay();
+          router.push(`/search-request/${encodeURIComponent(query)}`);
+        }
+      };
+      openSearchOverlay();
+      setSearchStatusText('Анализирую ваш запрос: "' + query + '"...');
+      setTimeout(nextStep, 1000);
     }
-    setSearchStatusText('Анализирую ваш запрос: "' + query + '"...');
-    setTimeout(nextStep, 1000);
   };
 
   const categoryItems = categoryName ? itemsData.filter(item => item.category === categoryName) : [];
@@ -46,7 +64,7 @@ const CategoryPage: React.FC = () => {
   return (
     <>
       <Header onSearch={handleHeaderSearch} showBackButton={true} />
-      <main className="container mx-auto p-4 pt-14 pb-20"> {/* Отступ изменен на pt-14 */}
+      <main className="container mx-auto p-4 pt-4 pb-20"> {/* Изменен pt-14 на pt-4 */}
         <h1 className="text-2xl font-bold mb-6 text-gray-800">
           {categoryName || 'Категория'}
         </h1>

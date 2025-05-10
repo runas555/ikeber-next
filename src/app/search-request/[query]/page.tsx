@@ -1,11 +1,12 @@
 "use client";
 import React, { useState, useContext } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faPaperPlane, faThumbsUp, faShieldAlt, faClock, faCheckCircle } from '@fortawesome/free-solid-svg-icons'; // Удалена faUserClock
+import { faPaperPlane, faThumbsUp, faShieldAlt, faClock, faCheckCircle } from '@fortawesome/free-solid-svg-icons';
 import { useRouter } from 'next/navigation';
 import Header from '@/components/Header';
-import NavigationBar from '@/components/NavigationBar'; // Импорт NavigationBar
-import { AppStateContext } from '@/context/AppStateProvider'; // Импорт AppStateContext
+import NavigationBar from '@/components/NavigationBar';
+import { AppStateContext } from '@/context/AppStateProvider';
+import { itemsData, Item } from '@/data/items'; // Добавлен импорт itemsData и Item
 
 interface SearchRequestPageProps {
   params: {
@@ -15,61 +16,64 @@ interface SearchRequestPageProps {
 
 const SearchRequestPage: React.FC<SearchRequestPageProps> = ({ params }) => {
   const router = useRouter();
-  const { setSearchQuery, openSearchOverlay, closeSearchOverlay, setSearchStatusText } = useContext(AppStateContext);
-  const query = decodeURIComponent(params.query);
+  // openSearchOverlay, closeSearchOverlay, setSearchStatusText больше не нужны здесь
+  const { setSearchQuery } = useContext(AppStateContext); 
+  const currentGlobalQuery = decodeURIComponent(params.query); 
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState(''); // Новое состояние для телефона
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    // const currentFormData = new FormData(event.currentTarget); // Не нужно, если используем состояние
-    // const phone = currentFormData.get('phone') as string; // Если бы использовали FormData
     const data = {
-      item: query,
+      item: currentGlobalQuery, // Используем currentGlobalQuery
       phone: phoneNumber,
     };
     console.log("Форма заявки отправлена:", data);
-    // setFormData({ phone: phoneNumber }); // Не нужно, так как phoneNumber уже в состоянии
     setFormSubmitted(true);
-    // Здесь, вы бы обычно отправили 'data' на ваш бэкенд
+  };
+
+  const performLocalSearch = (query: string): Item[] => { // Добавлен тип возвращаемого значения Item[]
+    if (!query.trim()) return [];
+    const lowerCaseQuery = query.toLowerCase();
+    return itemsData.filter((item: Item) =>  // Добавлен тип item: Item
+      item.name.toLowerCase().includes(lowerCaseQuery) ||
+      item.category.toLowerCase().includes(lowerCaseQuery) ||
+      item.provider.toLowerCase().includes(lowerCaseQuery) ||
+      item.description.toLowerCase().includes(lowerCaseQuery)
+    );
   };
 
   const handleHeaderSearch = (newQuery: string) => {
-    if (!newQuery) {
+    if (!newQuery.trim()) {
       console.warn("Search query is empty");
       return;
     }
-    setSearchQuery(newQuery); // Обновляем searchQuery в контексте
-    openSearchOverlay();
-    let step = 0;
-    const searchSteps = [
-        { text: "Проверяю наличие у ближайших продавцов...", delay: 1200 },
-        { text: "Ищу похожие товары и услуги в вашем городе...", delay: 1500 },
-        { text: "Подбираю лучшие варианты для вас...", delay: 1300 }
-    ];
-    function nextStep() {
-        if (step < searchSteps.length) {
-            setSearchStatusText(searchSteps[step].text);
-            setTimeout(nextStep, searchSteps[step].delay);
-            step++;
-        } else {
-            closeSearchOverlay();
-            // Если поиск со страницы заявки, то переходим на новую страницу заявки
-            router.push(`/search-request/${encodeURIComponent(newQuery)}`);
-        }
+    setSearchQuery(newQuery); // Обновляем глобальный searchQuery
+
+    const localResults = performLocalSearch(newQuery);
+
+    if (localResults.length > 0) {
+      router.push(`/search/${encodeURIComponent(newQuery)}`);
+    } else {
+      // Если мы уже на странице /search-request и локальных результатов нет,
+      // просто обновляем страницу с новым запросом (без SearchOverlay)
+      // или показываем SearchOverlay, если хотим сохранить консистентность.
+      // Для MVP, чтобы избежать зацикливания SearchOverlay, просто перейдем.
+      router.push(`/search-request/${encodeURIComponent(newQuery)}`);
+      // Если нужно показать SearchOverlay и здесь:
+      // openSearchOverlay();
+      // ... (логика с searchSteps)
     }
-    setSearchStatusText('Анализирую ваш запрос: "' + newQuery + '"...');
-    setTimeout(nextStep, 1000);
   };
 
-  const handleClosePage = () => { // Переименовано для ясности, что это закрытие страницы
+  const handleClosePage = () => {
     router.back(); // Возвращаемся на предыдущую страницу
   };
 
   return (
     <>
       <Header onSearch={handleHeaderSearch} showBackButton={true} />
-      <main className="container mx-auto p-4 pt-14 pb-20">
+      <main className="container mx-auto p-4 pt-4 pb-20"> {/* Изменен pt-14 на pt-4 */}
         <div className="max-w-lg mx-auto bg-white p-6 md:p-8 rounded-xl shadow-lg">
           {!formSubmitted ? (
             <>
@@ -104,7 +108,7 @@ const SearchRequestPage: React.FC<SearchRequestPageProps> = ({ params }) => {
                     type="text"
                     id="request_item"
                     name="item"
-                    defaultValue={query}
+                    defaultValue={currentGlobalQuery} // Используем currentGlobalQuery
                     className="w-full py-2.5 px-4 bg-gray-100 rounded-lg border border-gray-300 text-sm"
                     readOnly
                   />
@@ -136,13 +140,13 @@ const SearchRequestPage: React.FC<SearchRequestPageProps> = ({ params }) => {
               </form>
             </>
           ) : (
-            <div className="text-center py-8">
-              <FontAwesomeIcon icon={faCheckCircle} className="text-6xl text-green-500 mb-6" /> {/* Изменена иконка */}
+            <div className="text-center py-8"> {/* Этот div был незакрыт, но он закрывается ниже */}
+              <FontAwesomeIcon icon={faCheckCircle} className="text-6xl text-green-500 mb-6" />
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">
                 Отлично! Ваша заявка в работе.
               </h2>
               <p className="text-gray-700 leading-relaxed mb-3">
-                {`Мы получили ваш запрос на `}<strong className="text-blue-600">{`"${query}"`}</strong>{` и уже начали поиск.`}
+                {`Мы получили ваш запрос на `}<strong className="text-blue-600">{`"${currentGlobalQuery}"`}</strong>{` и уже начали поиск.`} {/* Используем currentGlobalQuery */}
               </p>
               <p className="text-gray-700 leading-relaxed mb-8">
                 {`Наш специалист свяжется с вами по номеру `}<strong className="text-blue-600">{phoneNumber}</strong>{` в ближайшее время, чтобы предложить лучшие варианты.`}

@@ -25,40 +25,55 @@ export default function HomePage() {
     setSearchQuery, 
     openSearchOverlay,
     closeSearchOverlay,
-    // openSearchResults, closeSearchResults удалены
     setSearchStatusText,
   } = useContext(AppStateContext);
 
+  const performLocalSearch = (query: string) => {
+    if (!query.trim()) return [];
+    const lowerCaseQuery = query.toLowerCase();
+    return itemsData.filter(item => 
+      item.name.toLowerCase().includes(lowerCaseQuery) ||
+      item.category.toLowerCase().includes(lowerCaseQuery) ||
+      item.provider.toLowerCase().includes(lowerCaseQuery) ||
+      item.description.toLowerCase().includes(lowerCaseQuery)
+    );
+  };
+
   const handleSearch = (query: string) => {
-    if (!query) {
-      // Add some visual feedback for empty search if desired
+    if (!query.trim()) {
       console.warn("Search query is empty");
       return;
     }
-    setSearchQuery(query);
-    openSearchOverlay();
-    // Simulate search steps (logic moved to AppStateProvider or a hook)
-    let step = 0;
-    const searchSteps = [
+    setSearchQuery(query); // Обновляем глобальный searchQuery для Header и других компонентов
+
+    const localResults = performLocalSearch(query);
+
+    if (localResults.length > 0) {
+      router.push(`/search/${encodeURIComponent(query)}`);
+    } else {
+      const searchSteps = [
         { text: "Проверяю наличие у ближайших продавцов...", delay: 1200 },
         { text: "Ищу похожие товары и услуги в вашем городе...", delay: 1500 },
         { text: "Подбираю лучшие варианты для вас...", delay: 1300 }
-    ];
-    function nextStep() {
-        if (step < searchSteps.length) {
-            setSearchStatusText(searchSteps[step].text);
-            setTimeout(nextStep, searchSteps[step].delay);
-            step++;
-        } else {
-            closeSearchOverlay();
-            // openSearchResults(query); // Больше не открываем модальное окно
-            router.push(`/search-request/${encodeURIComponent(query)}`); // Переходим на новую страницу
-        }
-    }
-    setSearchStatusText('Анализирую ваш запрос: "' + query + '"...');
-    setTimeout(nextStep, 1000);
-  };
+      ];
+      let step = 0;
 
+      const nextStep = () => { // Изменено на стрелочную функцию, объявленную до вызова
+        if (step < searchSteps.length) {
+          setSearchStatusText(searchSteps[step].text);
+          setTimeout(nextStep, searchSteps[step].delay);
+          step++;
+        } else {
+          closeSearchOverlay();
+          router.push(`/search-request/${encodeURIComponent(query)}`);
+        }
+      };
+      
+      openSearchOverlay();
+      setSearchStatusText('Анализирую ваш запрос: "' + query + '"...');
+      setTimeout(nextStep, 1000);
+    }
+  };
 
   const renderTabContent = () => {
     switch (activeTab) {
