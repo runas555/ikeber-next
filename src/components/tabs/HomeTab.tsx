@@ -81,9 +81,10 @@ const HomeTab: React.FC<HomeTabProps> = ({ items, onCategoryLinkClick }) => {
           <h2 className="text-lg font-semibold text-amber-700">Акции и скидки <FontAwesomeIcon icon={faTags} className="ml-1 text-amber-600" /></h2>
           <button className="text-amber-600 text-sm font-medium hover:text-amber-800">Все акции →</button>
         </div>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="flex overflow-x-auto gap-3 pb-2"> {/* Changed to flex container for horizontal scroll */}
           {promotionItems.map(promo => (
-            <div key={promo.id} className="item-card bg-white rounded-lg overflow-hidden border border-amber-300 relative cursor-pointer" onClick={() => router.push(`/products/${promo.id}`)}>
+            // Added width for two items visible by default, and flex-none to prevent shrinking
+            <div key={promo.id} className="item-card bg-white rounded-lg overflow-hidden border border-amber-300 relative cursor-pointer w-[calc(50%-0.375rem)] flex-none" onClick={() => router.push(`/products/${promo.id}`)}>
               <Image src={promo.image} alt={promo.name} width={200} height={112} className="w-full h-28 object-cover" />
               {promo.discount && <span className="text-xs bg-red-500 text-white px-2 py-0.5 rounded-md font-semibold absolute top-2 left-2">-{promo.discount}</span>}
               <div className="p-3">

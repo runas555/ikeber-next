@@ -105,5 +105,29 @@ export const itemsData: Item[] = [
       provider: "Чистый Дом Сервис",
       description: "Профессиональная уборка квартир и домов. Используем экологичные средства.",
       discount: "10%"
+  },
+  {
+    id: 10,
+    name: "Кофемолка 'Аромат Утра'",
+    category: "Товары для дома",
+    price: "2200 ₽",
+    image: "https://images.unsplash.com/photo-1509042239860-f550ce710b93?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8Y29mZmVlfGVufDB8fDB8fHww&auto=format&fit=crop&w=400&q=60",
+    provider: "КухняПрофи",
+    description: "Электрическая кофемолка с регулировкой степени помола. Начните утро с идеального кофе!",
+    discount: "20%",
+    expiry: "до 30 июня",
+    isPromotion: true
+  },
+  {
+    id: 11,
+    name: "Набор для рисования 'Юный Художник'",
+    category: "Книги и хобби",
+    price: "1850 ₽",
+    image: "https://images.unsplash.com/photo-1513364776144-60967b0f800f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cGFpbnRpbmd8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=400&q=60",
+    provider: "АртМастер",
+    description: "Большой набор для творчества: краски, кисти, карандаши и альбом. Идеально для детей и начинающих.",
+    discount: "15%",
+    expiry: "до 25 июня",
+    isPromotion: true
   }
 ];
