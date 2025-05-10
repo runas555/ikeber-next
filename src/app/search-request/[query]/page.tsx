@@ -70,7 +70,7 @@ const SearchRequestPage: React.FC<SearchRequestPageProps> = ({ params }) => {
   return (
     <>
       <Header onSearch={handleHeaderSearch} showBackButton={true} />
-      <main className="container mx-auto p-4 pt-24 pb-20"> {/* Увеличен отступ для Header и добавлен pb-20 для NavigationBar */}
+      <main className="container mx-auto p-4 pt-14 pb-20"> {/* Отступ изменен на pt-14 */}
         <div className="max-w-lg mx-auto bg-white min-h-screen flex flex-col">
           <div className="p-4">
             <div className="flex justify-between items-center mb-4">

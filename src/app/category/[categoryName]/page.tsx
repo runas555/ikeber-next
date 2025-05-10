@@ -46,7 +46,7 @@ const CategoryPage: React.FC = () => {
   return (
     <>
       <Header onSearch={handleHeaderSearch} showBackButton={true} />
-      <main className="container mx-auto p-4 pt-24 pb-20">
+      <main className="container mx-auto p-4 pt-14 pb-20"> {/* Отступ изменен на pt-14 */}
         <h1 className="text-2xl font-bold mb-6 text-gray-800">
           {categoryName || 'Категория'}
         </h1>

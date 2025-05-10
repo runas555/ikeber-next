@@ -57,7 +57,7 @@ const ProductPage: React.FC<ProductPageProps> = ({ params }) => {
     return (
       <>
         <Header onSearch={handleHeaderSearch} showBackButton={true} />
-        <main className="container mx-auto p-4 pt-24 pb-20"> {/* Увеличен отступ для Header и добавлен pb-20 для NavigationBar */}
+        <main className="container mx-auto p-4 pt-14 pb-20"> {/* Отступ изменен на pt-14 */}
           <p>Товар не найден</p>
         </main>
         <NavigationBar />
@@ -68,8 +68,8 @@ const ProductPage: React.FC<ProductPageProps> = ({ params }) => {
   return (
     <>
       <Header onSearch={handleHeaderSearch} showBackButton={true} />
-      <main className="container mx-auto p-4 pt-24 pb-20"> {/* Увеличен отступ для Header и добавлен pb-20 для NavigationBar */}
-        <div className="modal-content scrollbar-hide"> {/* Используем существующие стили для контента */}
+      <main className="container mx-auto p-4 pt-14 pb-20"> {/* Отступ изменен на pt-14 */}
+        <div className="scrollbar-hide"> {/* Удален класс modal-content, его отступы больше не нужны */}
           <Image
             src={product.image}
           alt={product.name}
