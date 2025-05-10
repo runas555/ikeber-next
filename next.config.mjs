@@ -11,6 +11,12 @@ const nextConfig = {
         // port: '', // Optional
         // pathname: '/account123/**', // Optional
       },
+      {
+        protocol: 'https',
+        hostname: 'i.pravatar.cc',
+        port: '',
+        pathname: '/**',
+      },
     ],
   },
   // experimental: {

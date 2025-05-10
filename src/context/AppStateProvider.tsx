@@ -1,47 +1,39 @@
 "use client";
 import React, { createContext, useState, useEffect, ReactNode, Dispatch, SetStateAction } from 'react';
-// Item is no longer used here
+import { User } from '@/data/users'; // Импортируем User
 
 // Define the shape of your context state
 interface AppState {
   activeTab: string;
-  // isProductModalOpen and selectedProduct are no longer needed
-  // isCategoryViewOpen and categoryForView are no longer needed
   isSearchOverlayOpen: boolean;
   searchStatusText: string;
-  // isSearchResultsOpen and searchQuery are no longer needed for SearchResultsContainer
-  // searchQuery is still needed for SearchOverlay
-  searchQuery: string; // Оставляем для SearchOverlay
-  notificationsCount: number; // Example
-  favoritesCount: number;    // Example
-  ordersBadgeCount: number;  // Example
+  searchQuery: string;
+  notificationsCount: number;
+  favoritesCount: number;
+  ordersBadgeCount: number;
+  currentUser: User | null; // Добавляем текущего пользователя
 }
 
 // Define the shape of your context value (state + setters)
 interface AppContextValue extends AppState {
   setActiveTab: Dispatch<SetStateAction<string>>;
-  // openProductModal and closeProductModal are no longer needed
-  // openCategoryItemsView and closeCategoryItemsView are no longer needed
   openSearchOverlay: () => void;
   closeSearchOverlay: () => void;
-  // openSearchResults and closeSearchResults are no longer needed
-  setSearchQuery: Dispatch<SetStateAction<string>>; // Все еще используется для SearchOverlay
+  setSearchQuery: Dispatch<SetStateAction<string>>;
   setSearchStatusText: Dispatch<SetStateAction<string>>;
-  // Add more setters or actions as needed
+  setCurrentUser: Dispatch<SetStateAction<User | null>>; // Сеттер для пользователя
+  logout: () => void; // Функция для выхода
 }
 
 const defaultState: AppState = {
   activeTab: 'home',
-  // isProductModalOpen and selectedProduct are no longer needed
-  // isCategoryViewOpen: false, // Больше не нужно
-  // categoryForView: null, // Больше не нужно
   isSearchOverlayOpen: false,
   searchStatusText: 'Анализирую ваш запрос...',
-  // isSearchResultsOpen: false, // Больше не нужно
-  searchQuery: '', // Все еще используется для SearchOverlay
-  notificationsCount: 2, // Sample data
-  favoritesCount: 0,   // Sample data
-  ordersBadgeCount: 0,    // Sample data
+  searchQuery: '',
+  notificationsCount: 2,
+  favoritesCount: 0,
+  ordersBadgeCount: 0,
+  currentUser: null, // Изначально пользователь не авторизован
 };
 
 export const AppStateContext = createContext<AppContextValue>(null!); // null! is okay if Provider always wraps
@@ -58,12 +50,18 @@ const AppStateProvider: React.FC<AppStateProviderProps> = ({ children }) => {
   const [isSearchOverlayOpen, setIsSearchOverlayOpen] = useState<boolean>(defaultState.isSearchOverlayOpen);
   const [searchStatusText, setSearchStatusText] = useState<string>(defaultState.searchStatusText);
   // const [isSearchResultsOpen, setIsSearchResultsOpen] = useState<boolean>(defaultState.isSearchResultsOpen); // Больше не нужно
-  const [searchQuery, setSearchQuery] = useState<string>(defaultState.searchQuery); // Все еще используется для SearchOverlay
-  
+  const [searchQuery, setSearchQuery] = useState<string>(defaultState.searchQuery);
+  const [currentUser, setCurrentUser] = useState<User | null>(defaultState.currentUser); // Состояние для пользователя
+
   // Example counts
   const [notificationsCount] = useState<number>(defaultState.notificationsCount);
   const [favoritesCount] = useState<number>(defaultState.favoritesCount);
   const [ordersBadgeCount] = useState<number>(defaultState.ordersBadgeCount);
+
+  const logout = () => {
+    setCurrentUser(null);
+    // Можно добавить здесь дополнительную логику, например, очистку localStorage
+  };
 
   // Scrollbar width effect
   useEffect(() => {
@@ -129,23 +127,20 @@ const AppStateProvider: React.FC<AppStateProviderProps> = ({ children }) => {
 
   const value: AppContextValue = {
     activeTab,
-    // isProductModalOpen and selectedProduct are no longer needed
-    // isCategoryViewOpen and categoryForView are no longer needed
     isSearchOverlayOpen,
     searchStatusText,
-    // isSearchResultsOpen is no longer needed
-    searchQuery, // Still needed for SearchOverlay
+    searchQuery,
     notificationsCount,
     favoritesCount,
     ordersBadgeCount,
-    setActiveTab: handleSetActiveTab, // Use wrapped setter
-    // openProductModal and closeProductModal are no longer needed
-    // openCategoryItemsView and closeCategoryItemsView are no longer needed
+    currentUser, // Передаем пользователя в контекст
+    setActiveTab: handleSetActiveTab,
     openSearchOverlay,
     closeSearchOverlay,
-    // openSearchResults and closeSearchResults are no longer needed
-    setSearchQuery, // Still needed for SearchOverlay
+    setSearchQuery,
     setSearchStatusText,
+    setCurrentUser, // Передаем сеттер
+    logout, // Передаем функцию выхода
   };
 
   return <AppStateContext.Provider value={value}>{children}</AppStateContext.Provider>;

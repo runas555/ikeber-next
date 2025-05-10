@@ -1,7 +1,10 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import Image from 'next/image';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { AppStateContext } from '@/context/AppStateProvider';
+import LoginForm from '@/components/LoginForm';
+import RegistrationForm from '@/components/RegistrationForm'; // Импортируем RegistrationForm
 import { 
   faMapMarkedAlt, 
   faChevronRight,
@@ -13,8 +16,10 @@ import {
 import { faCreditCard } from '@fortawesome/free-regular-svg-icons';
 
 const ProfileTab: React.FC = () => {
+  const { currentUser, logout } = useContext(AppStateContext);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('profile');
+  const [showLogin, setShowLogin] = useState(true); // Состояние для переключения форм
 
   const profileLinks = [
     { 
@@ -66,6 +71,14 @@ const ProfileTab: React.FC = () => {
     setTimeout(() => setLoading(false), 300);
   };
 
+  if (!currentUser) {
+    if (showLogin) {
+      return <LoginForm onSwitchToRegister={() => setShowLogin(false)} />;
+    } else {
+      return <RegistrationForm onSwitchToLogin={() => setShowLogin(true)} />;
+    }
+  }
+
   return (
     <div className="p-4">
       {loading && (
@@ -78,19 +91,20 @@ const ProfileTab: React.FC = () => {
 
       <div className="flex flex-col items-center mb-8">
         <div className="relative mb-4">
-          <Image 
-            src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8YXZhdGFyfGVufDB8fDB8fHww&auto=format&fit=crop&w=100&q=60" 
-            alt="Аватар" 
-            width={96} 
-            height={96} 
+          <Image
+            // Можно использовать аватар пользователя, если он есть, или заглушку
+            src={currentUser.email ? `https://i.pravatar.cc/150?u=${currentUser.email}` : "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8YXZhdGFyfGVufDB8fDB8fHww&auto=format&fit=crop&w=100&q=60"}
+            alt="Аватар"
+            width={96}
+            height={96}
             className="w-24 h-24 rounded-full border-4 border-white shadow-md object-cover"
           />
           <button className="absolute bottom-0 right-0 bg-blue-600 text-white p-2 rounded-full shadow-md hover:bg-blue-700 transition">
             <FontAwesomeIcon icon={faUserEdit} className="w-4 h-4" />
           </button>
         </div>
-        <h2 className="text-xl font-bold text-gray-800">Алексей Петров</h2>
-        <p className="text-gray-500">+7 (912) 345-67-89</p>
+        <h2 className="text-xl font-bold text-gray-800">{currentUser.username}</h2>
+        {currentUser.email && <p className="text-gray-500">{currentUser.email}</p>}
       </div>
 
       <div className="space-y-3 mb-6">
@@ -140,9 +154,13 @@ const ProfileTab: React.FC = () => {
         </div>
       </div>
 
-      <button 
+      <button
         className="w-full flex items-center justify-center py-3 px-4 text-red-600 hover:bg-red-50 rounded-xl transition"
-        onClick={() => setLoading(true)}
+        onClick={() => {
+          setLoading(true);
+          logout(); // Вызываем функцию logout из контекста
+          // setLoading(false) // Можно убрать, так как компонент перерисуется
+        }}
       >
         <FontAwesomeIcon icon={faSignOutAlt} className="mr-2" />
         Выйти из аккаунта
