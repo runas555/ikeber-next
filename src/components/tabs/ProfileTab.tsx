@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react'; // Добавляем useEffect
 import Image from 'next/image';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { AppStateContext } from '@/context/AppStateProvider';
@@ -20,6 +20,12 @@ const ProfileTab: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('profile');
   const [showLogin, setShowLogin] = useState(true); // Состояние для переключения форм
+
+  useEffect(() => {
+    // Сбрасываем состояние загрузки при изменении пользователя (вход/выход)
+    // Это предотвратит "зависание" индикатора после повторного входа.
+    setLoading(false);
+  }, [currentUser]);
 
   const profileLinks = [
     { 
@@ -68,7 +74,9 @@ const ProfileTab: React.FC = () => {
   const handleTabChange = (tab: string) => {
     setLoading(true);
     setActiveTab(tab);
-    setTimeout(() => setLoading(false), 300);
+    // Убираем setTimeout для немедленного скрытия индикатора загрузки,
+    // чтобы проверить, решает ли это проблему "зависания".
+    setLoading(false); 
   };
 
   if (!currentUser) {
