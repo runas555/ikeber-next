@@ -41,7 +41,7 @@ const NavigationBar: React.FC = () => {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-top z-40">
-      <div className="flex justify-around max-w-screen-sm mx-auto">
+      <div className="flex justify-around"> {/* Удалены max-w-screen-sm и mx-auto */}
         {tabs.map((tab) => (
           <button
             key={tab.id}
