@@ -1,7 +1,7 @@
 "use client";
 import React from 'react';
 import Image from 'next/image';
-// Or use AppStateContext to switch tabs/views
+import { useRouter } from 'next/navigation'; // Or use AppStateContext to switch tabs/views
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faCouch, faTools, faPalette, faLaptop, faTags, faStar, faChevronRight
@@ -23,10 +23,10 @@ const quickCategories = [
   { name: "Электроника", icon: faLaptop, color: "yellow", categoryId: "Электроника" },
 ];
 
-const promotions = [
-  { id: 'promo1', title: "Обед со скидкой", provider: 'Кафе "Вкусняшка"', image: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8Zm9vZHxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=400&q=60", discount: "20%", expiry: "до 31 мая" },
-  { id: 'promo2', title: "Гаджет недели", provider: 'Магазин "ТехноМир"', image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cHJvZHVjdHxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=400&q=60", discount: "15%", expiry: "до 25 мая" },
-];
+// const promotions = [
+//   { id: 'promo1', title: "Обед со скидкой", provider: 'Кафе "Вкусняшка"', image: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8Zm9vZHxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=400&q=60", discount: "20%", expiry: "до 31 мая" },
+//   { id: 'promo2', title: "Гаджет недели", provider: 'Магазин "ТехноМир"', image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cHJvZHVjdHxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=400&q=60", discount: "15%", expiry: "до 25 мая" },
+// ];
 
 const nearbyProviders = [
     { id: 'prov1', name: 'Магазин "Уютный Дом"', type: "Товары для дома", rating: 4.8, delivery: "Доставка от 99 ₽ • ~ 1.5 км", image: "https://images.unsplash.com/photo-1556157382-97eda2d62296?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8c2hvcHxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=100&q=60" },
@@ -42,6 +42,9 @@ const HomeTab: React.FC<HomeTabProps> = ({ items, onCategoryLinkClick }) => {
     items.find(i => i.id === 4),
     items.find(i => i.id === 8),
   ].filter(Boolean) as Item[]; // Filter out undefined if not found
+
+  const promotionItems = items.filter(item => item.isPromotion);
+  const router = useRouter();
 
   return (
     <div id="home-tab" className="tab-content active"> {/* 'active' class can be removed if parent controls visibility */}
@@ -79,14 +82,14 @@ const HomeTab: React.FC<HomeTabProps> = ({ items, onCategoryLinkClick }) => {
           <button className="text-amber-600 text-sm font-medium hover:text-amber-800">Все акции →</button>
         </div>
         <div className="grid grid-cols-2 gap-3">
-          {promotions.map(promo => (
-            <div key={promo.id} className="item-card bg-white rounded-lg overflow-hidden border border-amber-300 relative cursor-pointer" onClick={() => console.log("Open promo:", promo.title)}>
-              <Image src={promo.image} alt={promo.title} width={200} height={112} className="w-full h-28 object-cover" />
-              <span className="text-xs bg-red-500 text-white px-2 py-0.5 rounded-md font-semibold absolute top-2 left-2">-{promo.discount}</span>
+          {promotionItems.map(promo => (
+            <div key={promo.id} className="item-card bg-white rounded-lg overflow-hidden border border-amber-300 relative cursor-pointer" onClick={() => router.push(`/products/${promo.id}`)}>
+              <Image src={promo.image} alt={promo.name} width={200} height={112} className="w-full h-28 object-cover" />
+              {promo.discount && <span className="text-xs bg-red-500 text-white px-2 py-0.5 rounded-md font-semibold absolute top-2 left-2">-{promo.discount}</span>}
               <div className="p-3">
-                <h3 className="font-semibold text-sm text-gray-800 truncate mt-1">{promo.title}</h3>
+                <h3 className="font-semibold text-sm text-gray-800 truncate mt-1">{promo.name}</h3>
                 <p className="text-xs text-gray-500 mt-0.5">{promo.provider}</p>
-                <p className="text-xs text-red-600 font-medium mt-1">{promo.expiry}</p>
+                {promo.expiry && <p className="text-xs text-red-600 font-medium mt-1">{promo.expiry}</p>}
               </div>
             </div>
           ))}

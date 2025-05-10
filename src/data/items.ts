@@ -6,6 +6,9 @@ export interface Item {
   image: string;
   provider: string;
   description: string;
+  discount?: string; // Optional: Discount percentage (e.g., "20%")
+  expiry?: string;   // Optional: Promotion expiry date (e.g., "до 31 мая")
+  isPromotion?: boolean; // Optional: Flag to explicitly mark as promotion
 }
 
 export const itemsData: Item[] = [
@@ -16,7 +19,10 @@ export const itemsData: Item[] = [
       price: "2800 ₽",
       image: "https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTF8fGNlcmFtaWN8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=400&q=60",
       provider: "Керамика 'Тепло'",
-      description: "Элегантная керамическая ваза ручной работы, покрытая лазурной глазурью. Идеально дополнит ваш интерьер."
+      description: "Элегантная керамическая ваза ручной работы, покрытая лазурной глазурью. Идеально дополнит ваш интерьер.",
+      discount: "10%",
+      expiry: "до 15 июня",
+      isPromotion: true
   },
   {
       id: 2,
@@ -43,7 +49,10 @@ export const itemsData: Item[] = [
       price: "3990 ₽",
       image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8aGVhZHBob25lc3xlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=400&q=60",
       provider: "ТехноГаджет",
-      description: "Стильные беспроводные наушники с отличным качеством звука и длительным временем работы. Bluetooth 5.0."
+      description: "Стильные беспроводные наушники с отличным качеством звука и длительным временем работы. Bluetooth 5.0.",
+      discount: "15%",
+      expiry: "до 20 июня",
+      isPromotion: true
   },
   {
       id: 5,
