@@ -5,9 +5,8 @@ import { User } from '@/data/users'; // Импортируем тип User
 
 // Определяем тип для данных, ожидаемых в теле запроса
 interface NewUserPayload {
-  username: string;
-  password?: string; // Пароль обязателен для регистрации, но может быть опциональным в других контекстах User
-  email?: string;    // Email обязателен для регистрации
+  phoneNumber: string; // Изменено на phoneNumber
+  password?: string;   // Пароль обязателен для регистрации
 }
 
 // Определяем путь к файлу users.json
@@ -39,32 +38,27 @@ export async function POST(request: Request) {
   try {
     const payload = await request.json();
     
-    // Проверка типов и наличия обязательных полей вручную, так как request.json() возвращает any
-    if (typeof payload.username !== 'string' || typeof payload.password !== 'string' || typeof payload.email !== 'string' ||
-        !payload.username.trim() || !payload.password.trim() || !payload.email.trim()) {
-      return NextResponse.json({ message: 'Все поля (username, password, email) обязательны и должны быть строками' }, { status: 400 });
+    // Проверка типов и наличия обязательных полей вручную
+    if (typeof payload.phoneNumber !== 'string' || typeof payload.password !== 'string' ||
+        !payload.phoneNumber.trim() || !payload.password.trim()) {
+      return NextResponse.json({ message: 'Номер телефона и пароль обязательны и должны быть строками' }, { status: 400 });
     }
 
     const newUser: NewUserPayload = {
-      username: payload.username,
+      phoneNumber: payload.phoneNumber,
       password: payload.password,
-      email: payload.email,
     };
 
     const users = await getUsers();
 
-    // Проверка, существует ли пользователь с таким именем
-    if (users.find((u) => u.username === newUser.username)) {
-      return NextResponse.json({ message: 'Пользователь с таким именем уже существует' }, { status: 409 }); // 409 Conflict
-    }
-    
-    // Проверка, существует ли пользователь с таким email
-    if (users.find((u) => u.email === newUser.email)) {
-      return NextResponse.json({ message: 'Пользователь с таким email уже существует' }, { status: 409 });
+    // Проверка, существует ли пользователь с таким номером телефона
+    if (users.find((u) => u.phoneNumber === newUser.phoneNumber)) {
+      return NextResponse.json({ message: 'Пользователь с таким номером телефона уже существует' }, { status: 409 }); // 409 Conflict
     }
 
     const userWithId: User = {
-      ...newUser,
+      phoneNumber: newUser.phoneNumber, // Явно указываем поля
+      password: newUser.password,     // так как newUser теперь другого типа
       id: users.length > 0 ? Math.max(...users.map(u => u.id)) + 1 : 1,
     };
 

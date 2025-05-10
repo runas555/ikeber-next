@@ -2,9 +2,8 @@ import usersFromFile from './users.json';
 
 export interface User {
   id: number;
-  username: string;
-  password?: string; // Опционально, если пароли хранятся в другом месте или хешируются
-  email?: string;
+  phoneNumber: string; // Изменено с username/email на phoneNumber
+  password?: string;   // Пароль остается
   // Другие поля пользователя, если необходимо
 }
 

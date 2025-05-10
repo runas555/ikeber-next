@@ -100,8 +100,8 @@ const ProfileTab: React.FC = () => {
       <div className="flex flex-col items-center mb-8">
         <div className="relative mb-4">
           <Image
-            // Можно использовать аватар пользователя, если он есть, или заглушку
-            src={currentUser.email ? `https://i.pravatar.cc/150?u=${currentUser.email}` : "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8YXZhdGFyfGVufDB8fDB8fHww&auto=format&fit=crop&w=100&q=60"}
+            // Используем phoneNumber для генерации аватара или заглушку
+            src={currentUser.phoneNumber ? `https://i.pravatar.cc/150?u=${currentUser.phoneNumber}` : "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8YXZhdGFyfGVufDB8fDB8fHww&auto=format&fit=crop&w=100&q=60"}
             alt="Аватар"
             width={96}
             height={96}
@@ -111,8 +111,9 @@ const ProfileTab: React.FC = () => {
             <FontAwesomeIcon icon={faUserEdit} className="w-4 h-4" />
           </button>
         </div>
-        <h2 className="text-xl font-bold text-gray-800">{currentUser.username}</h2>
-        {currentUser.email && <p className="text-gray-500">{currentUser.email}</p>}
+        {/* Отображаем номер телефона. Можно добавить форматирование или псевдоним, если нужно */}
+        <h2 className="text-xl font-bold text-gray-800">{currentUser.phoneNumber}</h2>
+        {/* Email больше не отображаем, так как его нет в данных пользователя */}
       </div>
 
       <div className="space-y-3 mb-6">

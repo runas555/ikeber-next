@@ -9,9 +9,8 @@ interface RegistrationFormProps {
 
 const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSwitchToLogin }) => {
   const { setCurrentUser, setActiveTab } = useContext(AppStateContext);
-  const [username, setUsername] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState(''); // Изменено с username/email
   const [password, setPassword] = useState('');
-  const [email, setEmail] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -22,8 +21,8 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSwitchToLogin }) 
     setSuccess('');
     setIsLoading(true);
 
-    if (!username.trim() || !password.trim() || !email.trim()) {
-      setError('Все поля обязательны для заполнения');
+    if (!phoneNumber.trim() || !password.trim()) { // Проверка phoneNumber и password
+      setError('Номер телефона и пароль обязательны для заполнения');
       setIsLoading(false);
       return;
     }
@@ -34,7 +33,7 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSwitchToLogin }) 
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ username, password, email }),
+        body: JSON.stringify({ phoneNumber, password }), // Отправляем phoneNumber и password
       });
 
       const data = await response.json();
@@ -51,9 +50,8 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSwitchToLogin }) 
         setSuccess(data.message || 'Регистрация прошла успешно! Вы вошли в систему.');
         
         // Очистка формы
-        setUsername('');
+        setPhoneNumber('');
         setPassword('');
-        setEmail('');
 
         // Через некоторое время перенаправляем на вкладку профиля
         setTimeout(() => {
@@ -73,31 +71,16 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSwitchToLogin }) 
       <h2 className="text-2xl font-bold mb-6">Регистрация</h2>
       <form onSubmit={handleSubmit} className="w-full max-w-xs">
         <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="reg-username">
-            Имя пользователя
+          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="reg-phoneNumber">
+            Номер телефона
           </label>
           <input
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            id="reg-username"
-            type="text"
-            placeholder="Имя пользователя"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            required
-            disabled={isLoading}
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="reg-email">
-            Email
-          </label>
-          <input
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            id="reg-email"
-            type="email"
-            placeholder="your@email.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            id="reg-phoneNumber"
+            type="tel" // Изменен тип на tel
+            placeholder="+7 (XXX) XXX-XX-XX"
+            value={phoneNumber}
+            onChange={(e) => setPhoneNumber(e.target.value)}
             required
             disabled={isLoading}
           />

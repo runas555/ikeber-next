@@ -1,14 +1,12 @@
 [
   {
     "id": 1,
-    "username": "testuser",
-    "password": "password123",
-    "email": "testuser@example.com"
+    "phoneNumber": "+79001234567",
+    "password": "password123"
   },
   {
-    "username": "runas",
+    "phoneNumber": "+7565656565656",
     "password": "160295",
-    "email": "ist.sr@ya.ru",
     "id": 2
   }
 ]

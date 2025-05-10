@@ -9,7 +9,7 @@ interface LoginFormProps {
 
 const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister }) => {
   const { setCurrentUser, setActiveTab } = useContext(AppStateContext);
-  const [username, setUsername] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState(''); // Изменено на phoneNumber
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
@@ -17,16 +17,19 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister }) => {
     e.preventDefault();
     setError('');
 
+    // Ищем пользователя по номеру телефона и паролю
     const user = usersData.find(
-      (u) => u.username === username && u.password === password
+      (u) => u.phoneNumber === phoneNumber && u.password === password
     );
 
     if (user) {
-      setCurrentUser(user);
+      // Пароль не должен храниться в currentUser в состоянии приложения
+      const userToSetAsCurrent = { ...user };
+      delete userToSetAsCurrent.password; // Удаляем свойство password из копии
+      setCurrentUser(userToSetAsCurrent);
       setActiveTab('profile'); // Перенаправляем на вкладку профиля после входа
-      // В реальном приложении здесь может быть редирект или другие действия
     } else {
-      setError('Неверное имя пользователя или пароль');
+      setError('Неверный номер телефона или пароль'); // Обновлено сообщение об ошибке
     }
   };
 
@@ -35,21 +38,21 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister }) => {
       <h2 className="text-2xl font-bold mb-6">Вход</h2>
       <form onSubmit={handleSubmit} className="w-full max-w-xs">
         <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="username">
-            Имя пользователя
+          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="login-phoneNumber">
+            Номер телефона
           </label>
           <input
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            id="username"
-            type="text"
-            placeholder="Имя пользователя"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
+            id="login-phoneNumber"
+            type="tel" // Изменен тип на tel
+            placeholder="+7 (XXX) XXX-XX-XX"
+            value={phoneNumber}
+            onChange={(e) => setPhoneNumber(e.target.value)}
             required
           />
         </div>
         <div className="mb-6">
-          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="password">
+          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="login-password">
             Пароль
           </label>
           <input
