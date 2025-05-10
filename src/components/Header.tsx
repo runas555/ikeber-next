@@ -1,8 +1,8 @@
 "use client";
-import React, { useState, useContext } from 'react'; // useContext был здесь, но не использовался напрямую в useState
+import React, { useState, useContext } from 'react';
 import Image from 'next/image';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faMapMarkerAlt, faChevronDown, faSearch, faArrowLeft } from '@fortawesome/free-solid-svg-icons'; // Добавлена faArrowLeft
+import { faSearch, faArrowLeft, faPaperPlane } from '@fortawesome/free-solid-svg-icons'; // Добавлена faPaperPlane
 import { faHeart, faBell } from '@fortawesome/free-regular-svg-icons';
 import { AppStateContext } from '@/context/AppStateProvider';
 import { useRouter } from 'next/navigation'; // Импорт useRouter
@@ -32,64 +32,62 @@ const Header: React.FC<HeaderProps> = ({ onSearch, showBackButton = false }) => 
 
   return (
     <header className="bg-white py-3 px-4 sticky top-0 z-30 border-b border-gray-200">
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center space-x-2">
-          {showBackButton && (
-            <button onClick={() => router.back()} className="text-gray-600 hover:text-blue-600 p-2 -ml-2">
-              <FontAwesomeIcon icon={faArrowLeft} className="text-xl" />
-            </button>
-          )}
-          <Image src="/ikeber.svg" alt="Local Hub Logo" width={24} height={24} className="text-blue-600" />
-          {!showBackButton && ( // Показываем кнопку города только если нет кнопки "Назад"
-            <button className="flex items-center text-xs text-gray-500 hover:text-blue-600 ml-3">
-              <FontAwesomeIcon icon={faMapMarkerAlt} className="mr-1 text-red-500" />
-              <span>Екатеринбург</span>
-              <FontAwesomeIcon icon={faChevronDown} className="text-xs ml-1" />
+      <div className="flex items-center justify-between space-x-2">
+        {/* Левая часть: Кнопка назад или логотип */}
+        {showBackButton ? (
+          <button onClick={() => router.back()} className="text-gray-600 hover:text-blue-600 p-1">
+            <FontAwesomeIcon icon={faArrowLeft} className="text-xl" />
+          </button>
+        ) : (
+          <Image src="/ikeber.svg" alt="Local Hub Logo" width={28} height={28} className="text-blue-600" /> // Немного увеличил лого
+        )}
+
+        {/* Центральная часть: Поиск */}
+        <div className="relative flex-grow mx-2">
+          <input
+            type="text"
+            placeholder="Найти товар, услугу..." // Сократил плейсхолдер
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyPress={handleKeyPress}
+            className="w-full py-2 px-3 pl-10 pr-10 bg-gray-100 rounded-lg border border-gray-200 focus:border-blue-400 search-input text-sm" // Добавлен pr-10
+          />
+          <FontAwesomeIcon
+            icon={faSearch} // Лупа слева остается
+            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+          />
+          {searchQuery.length > 0 && (
+            <button
+              type="button"
+              onClick={handleSearchSubmit}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-blue-500 hover:text-blue-700 p-1"
+              aria-label="Искать"
+            >
+              <FontAwesomeIcon icon={faPaperPlane} className="text-lg" />
             </button>
           )}
         </div>
-        <div className="flex items-center space-x-4">
-          <button className="text-gray-500 hover:text-blue-600 relative">
+        
+        {/* Правая часть: Только иконки действий */}
+        <div className="flex items-center space-x-2">
+          <button className="text-gray-500 hover:text-blue-600 relative p-1">
             <FontAwesomeIcon icon={faHeart} className="text-xl" />
             {favoritesCount > 0 && (
-              <span className="badge bg-red-500 text-white rounded-full flex items-center justify-center">
+              <span className="badge-sm bg-red-500 text-white rounded-full flex items-center justify-center">
                 {favoritesCount}
               </span>
             )}
           </button>
-          <button className="text-gray-500 hover:text-blue-600 relative">
+          <button className="text-gray-500 hover:text-blue-600 relative p-1">
             <FontAwesomeIcon icon={faBell} className="text-xl" />
             {notificationsCount > 0 && (
-               <span className="badge bg-blue-500 text-white rounded-full flex items-center justify-center">
+               <span className="badge-sm bg-blue-500 text-white rounded-full flex items-center justify-center">
                 {notificationsCount}
                </span>
             )}
           </button>
+          {/* Внешняя кнопка поиска удалена */}
         </div>
-      </div>
-
-      <div className="flex items-center">
-        <div className="relative flex-grow">
-          <input
-            type="text"
-            placeholder="Найти товар, услугу или мастера..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            onKeyPress={handleKeyPress}
-            className="w-full py-2.5 px-4 pl-10 pr-3 bg-gray-100 rounded-l-lg border border-r-0 border-gray-200 focus:border-blue-400 search-input text-sm"
-          />
-          <FontAwesomeIcon
-            icon={faSearch}
-            className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-          />
-        </div>
-        <button
-          type="button"
-          onClick={handleSearchSubmit}
-          className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-4 rounded-r-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 -ml-px"
-        >
-          Искать
-        </button>
       </div>
     </header>
   );
