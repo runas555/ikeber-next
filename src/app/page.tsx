@@ -8,7 +8,7 @@ import CategoriesTab from '@/components/tabs/CategoriesTab';
 import OrdersTab from '@/components/tabs/OrdersTab';
 import ProfileTab from '@/components/tabs/ProfileTab';
 // ProductModal больше не нужен здесь
-import SearchOverlay from '@/components/SearchOverlay';
+// SearchOverlay будет рендериться в layout.tsx
 // SearchResultsContainer больше не нужен здесь
 import { AppStateContext } from '@/context/AppStateProvider'; // To be created
 import { itemsData } from '@/data/items'; // Example data import
@@ -20,8 +20,8 @@ export default function HomePage() {
     activeTab,
     // isProductModalOpen, selectedProduct, openProductModal, closeProductModal больше не нужны
     // isCategoryViewOpen, categoryForView, openCategoryItemsView, closeCategoryItemsView больше не нужны
-    isSearchOverlayOpen,
-    searchStatusText,
+    // isSearchOverlayOpen, // Больше не используется в этом файле
+    // searchStatusText, // Больше не используется в этом файле
     setSearchQuery, 
     openSearchOverlay,
     closeSearchOverlay,
@@ -91,11 +91,7 @@ export default function HomePage() {
       <NavigationBar />
 
       {/* ProductModal и CategoryItemsView больше не отображаются здесь */}
-
-      {isSearchOverlayOpen && (
-        <SearchOverlay isOpen={isSearchOverlayOpen} statusText={searchStatusText} />
-      )}
-
+      {/* SearchOverlay теперь будет рендериться в layout.tsx */}
       {/* SearchResultsContainer больше не отображается здесь */}
     </>
   );

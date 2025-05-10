@@ -3,7 +3,8 @@ import { Inter } from 'next/font/google';
 import './globals.css'; // Tailwind and custom global styles
 import { config as fontAwesomeConfig } from '@fortawesome/fontawesome-svg-core';
 import '@fortawesome/fontawesome-svg-core/styles.css'; // Import the CSS
-import AppStateProvider from '@/context/AppStateProvider'; // To be created for managing global state
+import AppStateProvider from '@/context/AppStateProvider'; 
+import GlobalSearchOverlay from '@/components/GlobalSearchOverlay'; // Импортируем GlobalSearchOverlay
 
 // Prevent Font Awesome from adding its CSS since we did it manually
 fontAwesomeConfig.autoAddCss = false;
@@ -28,6 +29,7 @@ export default function RootLayout({
           <div className="mx-auto bg-white min-h-screen flex flex-col shadow-lg">
             {children}
           </div>
+          <GlobalSearchOverlay /> {/* Добавляем GlobalSearchOverlay сюда */}
         </AppStateProvider>
       </body>
     </html>
