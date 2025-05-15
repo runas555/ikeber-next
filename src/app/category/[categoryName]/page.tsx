@@ -13,25 +13,30 @@ const CategoryPage: React.FC = () => {
   const params = useParams();
   const categoryName = params.categoryName ? decodeURIComponent(params.categoryName as string) : null;
   const [categoryItems, setCategoryItems] = useState<Item[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const { setSearchQuery, openSearchOverlay, closeSearchOverlay, setSearchStatusText } = useContext(AppStateContext);
 
   useEffect(() => {
     const fetchCategoryItems = async () => {
-      if (!categoryName) return;
-      
-      const { data, error } = await supabase
-        .from('items')
-        .select()
-        .eq('category', categoryName);
+      try {
+        if (!categoryName) return;
+        
+        const { data, error } = await supabase
+          .from('items')
+          .select()
+          .eq('category', categoryName);
 
-      if (error) {
-        console.error('Error fetching category items:', error);
-        return;
-      }
+        if (error) {
+          console.error('Error fetching category items:', error);
+          return;
+        }
 
-      if (data) {
-        setCategoryItems(data);
+        if (data) {
+          setCategoryItems(data);
+        }
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -79,6 +84,20 @@ const CategoryPage: React.FC = () => {
       setTimeout(nextStep, 1000);
     }
   };
+
+  if (loading) {
+    return (
+      <>
+        <Header onSearch={handleHeaderSearch} showBackButton={true} />
+        <main className="container mx-auto p-4 pt-4 pb-20">
+          <div className="flex justify-center items-center h-64">
+            <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500"></div>
+          </div>
+        </main>
+        <NavigationBar />
+      </>
+    );
+  }
 
   return (
     <>

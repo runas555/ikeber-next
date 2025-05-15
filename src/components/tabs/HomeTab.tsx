@@ -1,5 +1,5 @@
 "use client";
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation'; // Or use AppStateContext to switch tabs/views
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -36,10 +36,11 @@ const nearbyProviders = [
 
 
 const HomeTab: React.FC<HomeTabProps> = ({ onCategoryLinkClick }) => {
-  const [recommendedItems, setRecommendedItems] = React.useState<Item[]>([]);
-  const [promotionItems, setPromotionItems] = React.useState<Item[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [recommendedItems, setRecommendedItems] = useState<Item[]>([]);
+  const [promotionItems, setPromotionItems] = useState<Item[]>([]);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const fetchItems = async () => {
       // Получаем рекомендуемые товары
       const { data: recommendedData } = await supabase
@@ -55,6 +56,7 @@ const HomeTab: React.FC<HomeTabProps> = ({ onCategoryLinkClick }) => {
 
       if (recommendedData) setRecommendedItems(recommendedData);
       if (promotionData) setPromotionItems(promotionData);
+      setLoading(false);
     };
 
     fetchItems();
@@ -119,7 +121,11 @@ const HomeTab: React.FC<HomeTabProps> = ({ onCategoryLinkClick }) => {
           <button className="text-blue-600 text-sm font-medium hover:text-blue-800">Все →</button>
         </div>
         <div className="grid grid-cols-2 gap-3">
-          {recommendedItems.length > 0 ? (
+          {loading ? (
+            <div className="col-span-2 flex justify-center py-4">
+              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+            </div>
+          ) : recommendedItems.length > 0 ? (
             recommendedItems.map((item: Item) => (
               <ProductCard key={item.id} item={item} />
             ))

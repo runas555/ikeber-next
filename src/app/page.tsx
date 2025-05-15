@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useContext } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import NavigationBar from '@/components/NavigationBar';
 import HomeTab from '@/components/tabs/HomeTab';
@@ -15,7 +15,8 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 
 export default function HomePage() {
-  const router = useRouter(); // Инициализируем useRouter
+  const router = useRouter();
+  const [loading, setLoading] = useState(true);
   const {
     activeTab,
     // isProductModalOpen, selectedProduct, openProductModal, closeProductModal больше не нужны
@@ -94,6 +95,21 @@ export default function HomePage() {
         return <HomeTab onCategoryLinkClick={(categoryName) => router.push(`/category/${encodeURIComponent(categoryName)}`)} />;
     }
   };
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500"></div>
+      </div>
+    );
+  }
 
   return (
     <>

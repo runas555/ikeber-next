@@ -90,7 +90,9 @@ const ProductPage: React.FC<ProductPageProps> = ({ params }) => {
       <>
         <Header onSearch={handleHeaderSearch} showBackButton={true} />
         <main className="container mx-auto p-4 pt-4 pb-20">
-          <p>Загрузка...</p>
+          <div className="flex justify-center items-center h-64">
+            <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500"></div>
+          </div>
         </main>
         <NavigationBar />
       </>

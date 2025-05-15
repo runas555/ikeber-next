@@ -1,8 +1,8 @@
 "use client";
 import React, { createContext, useState, useEffect, ReactNode, Dispatch, SetStateAction } from 'react';
-import { User } from '@/data/users'; // Импортируем User
+import { User } from '@/data/users';
+import FullPageLoader from '@/components/FullPageLoader';
 
-// Define the shape of your context state
 interface AppState {
   activeTab: string;
   isSearchOverlayOpen: boolean;
@@ -11,18 +11,19 @@ interface AppState {
   notificationsCount: number;
   favoritesCount: number;
   ordersBadgeCount: number;
-  currentUser: User | null; // Добавляем текущего пользователя
+  currentUser: User | null;
+  isLoading: boolean;
 }
 
-// Define the shape of your context value (state + setters)
 interface AppContextValue extends AppState {
   setActiveTab: Dispatch<SetStateAction<string>>;
   openSearchOverlay: () => void;
   closeSearchOverlay: () => void;
   setSearchQuery: Dispatch<SetStateAction<string>>;
   setSearchStatusText: Dispatch<SetStateAction<string>>;
-  setCurrentUser: Dispatch<SetStateAction<User | null>>; // Сеттер для пользователя
-  logout: () => void; // Функция для выхода
+  setCurrentUser: Dispatch<SetStateAction<User | null>>;
+  setIsLoading: Dispatch<SetStateAction<boolean>>;
+  logout: () => void;
 }
 
 const defaultState: AppState = {
@@ -33,10 +34,11 @@ const defaultState: AppState = {
   notificationsCount: 2,
   favoritesCount: 0,
   ordersBadgeCount: 0,
-  currentUser: null, // Изначально пользователь не авторизован
+  currentUser: null,
+  isLoading: false,
 };
 
-export const AppStateContext = createContext<AppContextValue>(null!); // null! is okay if Provider always wraps
+export const AppStateContext = createContext<AppContextValue>(null!);
 
 interface AppStateProviderProps {
   children: ReactNode;
@@ -44,86 +46,58 @@ interface AppStateProviderProps {
 
 const AppStateProvider: React.FC<AppStateProviderProps> = ({ children }) => {
   const [activeTab, setActiveTab] = useState<string>(defaultState.activeTab);
-  // isProductModalOpen and selectedProduct states are no longer needed
-  // const [isCategoryViewOpen, setIsCategoryViewOpen] = useState<boolean>(defaultState.isCategoryViewOpen); // Больше не нужно
-  // const [categoryForView, setCategoryForView] = useState<string | null>(defaultState.categoryForView); // Больше не нужно
   const [isSearchOverlayOpen, setIsSearchOverlayOpen] = useState<boolean>(defaultState.isSearchOverlayOpen);
   const [searchStatusText, setSearchStatusText] = useState<string>(defaultState.searchStatusText);
-  // const [isSearchResultsOpen, setIsSearchResultsOpen] = useState<boolean>(defaultState.isSearchResultsOpen); // Больше не нужно
   const [searchQuery, setSearchQuery] = useState<string>(defaultState.searchQuery);
-  const [currentUser, setCurrentUser] = useState<User | null>(defaultState.currentUser); // Состояние для пользователя
+  const [currentUser, setCurrentUser] = useState<User | null>(defaultState.currentUser);
+  const [isLoading, setIsLoading] = useState<boolean>(defaultState.isLoading);
 
-  // Example counts
   const [notificationsCount] = useState<number>(defaultState.notificationsCount);
   const [favoritesCount] = useState<number>(defaultState.favoritesCount);
   const [ordersBadgeCount] = useState<number>(defaultState.ordersBadgeCount);
 
   const logout = () => {
     setCurrentUser(null);
-    // Можно добавить здесь дополнительную логику, например, очистку localStorage
   };
 
-  // Scrollbar width effect
   useEffect(() => {
     const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
     document.documentElement.style.setProperty('--scrollbar-width', `${scrollbarWidth}px`);
 
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' || event.key === 'Tab') { // Tab also closes modals as per original HTML
-        // if (isProductModalOpen) closeProductModal(); // No longer needed
-        // if (isCategoryViewOpen) closeCategoryItemsView(); // No longer needed
-        // else if (isSearchResultsOpen) closeSearchResults(); // No longer needed
-        // Search overlay might not need esc/tab close or handled differently
-        // Если SearchOverlay должен закрываться по Esc/Tab, нужно добавить его состояние в зависимости и вызов closeSearchOverlay()
+      if (event.key === 'Escape' || event.key === 'Tab') {
+        closeSearchOverlay();
       }
     };
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, []); // Зависимости теперь пустые, если SearchOverlay не управляется Esc/Tab
+  }, []);
 
   const manageBodyScroll = (shouldLock: boolean) => {
     if (shouldLock) {
       document.body.classList.add('no-scroll');
     } else {
-      // Only remove no-scroll if no other modal is active
-      if (!isSearchOverlayOpen) { // Остался только SearchOverlay
+      if (!isSearchOverlayOpen) {
          document.body.classList.remove('no-scroll');
       }
     }
   };
   
-  // Update body scroll whenever a modal's state changes
   useEffect(() => {
-    manageBodyScroll(isSearchOverlayOpen); // Остался только SearchOverlay
-  }, [isSearchOverlayOpen]); // Остался только SearchOverlay
-
-
-  // openProductModal and closeProductModal are no longer needed
-  // openCategoryItemsView and closeCategoryItemsView are no longer needed
+    manageBodyScroll(isSearchOverlayOpen);
+  }, [isSearchOverlayOpen]);
 
   const openSearchOverlay = () => setIsSearchOverlayOpen(true);
-  const closeSearchOverlay = () => {
-    setIsSearchOverlayOpen(false);
-    // setSearchQuery(''); // Можно очищать searchQuery здесь, если SearchOverlay его меняет и он больше не нужен
-  }
-
-  // openSearchResults and closeSearchResults are no longer needed
+  const closeSearchOverlay = () => setIsSearchOverlayOpen(false);
 
   const handleSetActiveTab: Dispatch<SetStateAction<string>> = (tabId) => {
-    // Close all modals when switching tabs
-    // closeProductModal(); // No longer needed
-    // closeCategoryItemsView(); // No longer needed
-    closeSearchOverlay(); // Also close search processing
-    // closeSearchResults(); // No longer needed
+    closeSearchOverlay();
     setActiveTab(tabId);
-    // Scroll to top of new tab content
-    // This is tricky from context, page.tsx might handle its own main scroll area
     requestAnimationFrame(() => {
       const mainElement = document.querySelector('main');
       if (mainElement) mainElement.scrollTop = 0;
     });
   };
-
 
   const value: AppContextValue = {
     activeTab,
@@ -133,17 +107,24 @@ const AppStateProvider: React.FC<AppStateProviderProps> = ({ children }) => {
     notificationsCount,
     favoritesCount,
     ordersBadgeCount,
-    currentUser, // Передаем пользователя в контекст
+    currentUser,
+    isLoading,
     setActiveTab: handleSetActiveTab,
     openSearchOverlay,
     closeSearchOverlay,
     setSearchQuery,
     setSearchStatusText,
-    setCurrentUser, // Передаем сеттер
-    logout, // Передаем функцию выхода
+    setCurrentUser,
+    setIsLoading,
+    logout,
   };
 
-  return <AppStateContext.Provider value={value}>{children}</AppStateContext.Provider>;
+  return (
+    <AppStateContext.Provider value={value}>
+      {children}
+      {isLoading && <FullPageLoader />}
+    </AppStateContext.Provider>
+  );
 };
 
 export default AppStateProvider;
