@@ -4,7 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link'; // Импортируем Link
 // import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'; // Удалено
 // import { faCartPlus } from '@fortawesome/free-solid-svg-icons'; // Удалено
-import { Item } from '@/data/items'; // Assuming Item type
+import { Item } from '@/types/item';
 
 interface ProductCardProps {
   item: Item;

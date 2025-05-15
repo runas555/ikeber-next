@@ -3,7 +3,7 @@ import React from 'react';
 import Image from 'next/image';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTimes, faCartPlus } from '@fortawesome/free-solid-svg-icons';
-import { Item } from '@/data/items'; // Assuming Item type is in data/items.ts
+import { Item } from '@/types/item';
 
 interface ProductModalProps {
   product: Item;

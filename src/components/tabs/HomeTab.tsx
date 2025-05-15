@@ -6,12 +6,12 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faCouch, faTools, faPalette, faLaptop, faTags, faStar, faChevronRight
 } from '@fortawesome/free-solid-svg-icons';
-import { Item } from '@/data/items';
+import { Item } from '@/types/item';
+import { supabase } from '@/lib/supabase';
 import ProductCard from '@/components/ProductCard'; // Reusable ProductCard
 
 interface HomeTabProps {
-  items: Item[];
-  // onProductClick больше не нужен
+  // items больше не нужны, получаем из Supabase
   onCategoryLinkClick: (categoryName: string) => void; // For "Что ищем сегодня?"
 }
 
@@ -35,15 +35,30 @@ const nearbyProviders = [
 ];
 
 
-const HomeTab: React.FC<HomeTabProps> = ({ items, onCategoryLinkClick }) => {
-  const recommendedItemsPlaceholders = [ // Replace with actual item IDs or full item objects if needed
-    items.find(i => i.id === 1),
-    items.find(i => i.category === "Ремонт и услуги"), // Example: find a service
-    items.find(i => i.id === 4),
-    items.find(i => i.id === 8),
-  ].filter(Boolean) as Item[]; // Filter out undefined if not found
+const HomeTab: React.FC<HomeTabProps> = ({ onCategoryLinkClick }) => {
+  const [recommendedItems, setRecommendedItems] = React.useState<Item[]>([]);
+  const [promotionItems, setPromotionItems] = React.useState<Item[]>([]);
 
-  const promotionItems = items.filter(item => item.isPromotion);
+  React.useEffect(() => {
+    const fetchItems = async () => {
+      // Получаем рекомендуемые товары
+      const { data: recommendedData } = await supabase
+        .from('items')
+        .select()
+        .limit(4);
+      
+      // Получаем товары по акции
+      const { data: promotionData } = await supabase
+        .from('items')
+        .select()
+        .eq('is_promotion', true);
+
+      if (recommendedData) setRecommendedItems(recommendedData);
+      if (promotionData) setPromotionItems(promotionData);
+    };
+
+    fetchItems();
+  }, []);
   const router = useRouter();
 
   return (
@@ -104,9 +119,15 @@ const HomeTab: React.FC<HomeTabProps> = ({ items, onCategoryLinkClick }) => {
           <button className="text-blue-600 text-sm font-medium hover:text-blue-800">Все →</button>
         </div>
         <div className="grid grid-cols-2 gap-3">
-          {recommendedItemsPlaceholders.map((item) => (
-            <ProductCard key={item.id} item={item} />
-          ))}
+          {recommendedItems.length > 0 ? (
+            recommendedItems.map((item: Item) => (
+              <ProductCard key={item.id} item={item} />
+            ))
+          ) : (
+            <div className="col-span-2 text-center text-gray-500 py-4">
+              Нет рекомендуемых товаров
+            </div>
+          )}
         </div>
       </div>
 

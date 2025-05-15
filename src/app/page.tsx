@@ -10,9 +10,9 @@ import ProfileTab from '@/components/tabs/ProfileTab';
 // ProductModal больше не нужен здесь
 // SearchOverlay будет рендериться в layout.tsx
 // SearchResultsContainer больше не нужен здесь
-import { AppStateContext } from '@/context/AppStateProvider'; // To be created
-import { itemsData } from '@/data/items'; // Example data import
-import { useRouter } from 'next/navigation'; // Импортируем useRouter
+import { AppStateContext } from '@/context/AppStateProvider';
+import { useRouter } from 'next/navigation';
+import { supabase } from '@/lib/supabase';
 
 export default function HomePage() {
   const router = useRouter(); // Инициализируем useRouter
@@ -28,27 +28,25 @@ export default function HomePage() {
     setSearchStatusText,
   } = useContext(AppStateContext);
 
-  const performLocalSearch = (query: string) => {
-    if (!query.trim()) return [];
-    const lowerCaseQuery = query.toLowerCase();
-    return itemsData.filter(item => 
-      item.name.toLowerCase().includes(lowerCaseQuery) ||
-      item.category.toLowerCase().includes(lowerCaseQuery) ||
-      item.provider.toLowerCase().includes(lowerCaseQuery) ||
-      item.description.toLowerCase().includes(lowerCaseQuery)
-    );
-  };
-
-  const handleSearch = (query: string) => {
+  const handleSearch = async (query: string) => {
     if (!query.trim()) {
       console.warn("Search query is empty");
       return;
     }
-    setSearchQuery(query); // Обновляем глобальный searchQuery для Header и других компонентов
+    setSearchQuery(query);
 
-    const localResults = performLocalSearch(query);
+    // Проверяем наличие товаров в Supabase
+    const { data, error } = await supabase
+      .from('items')
+      .select()
+      .or(`name.ilike.%${query}%,category.ilike.%${query}%,provider.ilike.%${query}%`);
 
-    if (localResults.length > 0) {
+    if (error) {
+      console.error('Search error:', error);
+      return;
+    }
+
+    if (data && data.length > 0) {
       router.push(`/search/${encodeURIComponent(query)}`);
     } else {
       const searchSteps = [
@@ -84,7 +82,7 @@ export default function HomePage() {
         // HomeTab также нужно будет обновить для использования Link.
         // Для MVP я оставлю HomeTab без этой функциональности, чтобы сфокусироваться на CategoriesTab.
         // Если потребуется, можно будет добавить onCategoryLinkClick={(categoryName) => router.push(`/category/${encodeURIComponent(categoryName)}`)}
-        return <HomeTab items={itemsData} onCategoryLinkClick={(categoryName) => router.push(`/category/${encodeURIComponent(categoryName)}`)} />;
+        return <HomeTab onCategoryLinkClick={(categoryName) => router.push(`/category/${encodeURIComponent(categoryName)}`)} />;
       case 'categories':
         return <CategoriesTab />; // Больше не передаем onCategoryClick
       case 'orders':
@@ -93,7 +91,7 @@ export default function HomePage() {
         return <ProfileTab />;
       default:
         // Ветка default должна также использовать router.push для категорий
-        return <HomeTab items={itemsData} onCategoryLinkClick={(categoryName) => router.push(`/category/${encodeURIComponent(categoryName)}`)} />;
+        return <HomeTab onCategoryLinkClick={(categoryName) => router.push(`/category/${encodeURIComponent(categoryName)}`)} />;
     }
   };
 

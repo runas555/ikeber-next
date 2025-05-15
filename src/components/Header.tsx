@@ -6,25 +6,34 @@ import { faSearch, faArrowLeft, faPaperPlane } from '@fortawesome/free-solid-svg
 import { faHeart, faBell } from '@fortawesome/free-regular-svg-icons';
 import { AppStateContext } from '@/context/AppStateProvider';
 import { useRouter } from 'next/navigation';
-import { itemsData } from '@/data/items'; // Импортируем данные для подсказок
+import { supabase } from '@/lib/supabase';
 
 interface HeaderProps {
   onSearch: (query: string) => void;
   showBackButton?: boolean;
 }
 
-// Готовим данные для подсказок один раз
-const allKeywords = Array.from(
-  new Set(
-    itemsData.flatMap(item => [
-      item.name,
-      item.category,
-      item.provider,
-      // Можно добавить слова из item.description, разбив их, но это усложнит и увеличит массив
-      // item.description.split(/\s+/).filter(word => word.length > 3) // Пример
-    ]).map(kw => kw.toLowerCase()) // Приводим к нижнему регистру для поиска без учета регистра
-  )
-);
+// Получаем ключевые слова для подсказок из Supabase
+const getSearchKeywords = async () => {
+  const { data, error } = await supabase
+    .from('items')
+    .select('name, category, provider');
+  
+  if (error) {
+    console.error('Error fetching search keywords:', error);
+    return [];
+  }
+
+  return Array.from(
+    new Set(
+      data.flatMap(item => [
+        item.name,
+        item.category,
+        item.provider
+      ]).map(kw => kw.toLowerCase())
+    )
+  );
+};
 
 
 const Header: React.FC<HeaderProps> = ({ onSearch, showBackButton = false }) => {
@@ -32,6 +41,7 @@ const Header: React.FC<HeaderProps> = ({ onSearch, showBackButton = false }) => 
   const [searchQuery, setSearchQuery] = useState('');
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [searchKeywords, setSearchKeywords] = useState<string[]>([]);
   const searchContainerRef = useRef<HTMLDivElement>(null); // Для отслеживания кликов вне
 
   const appState = useContext(AppStateContext);
@@ -39,6 +49,9 @@ const Header: React.FC<HeaderProps> = ({ onSearch, showBackButton = false }) => 
   const favoritesCount = appState ? appState.favoritesCount : 0;
 
   useEffect(() => {
+    // Загружаем ключевые слова при монтировании
+    getSearchKeywords().then(keywords => setSearchKeywords(keywords));
+
     // Обработчик клика вне области поиска для скрытия подсказок
     const handleClickOutside = (event: MouseEvent) => {
       if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
@@ -55,7 +68,7 @@ const Header: React.FC<HeaderProps> = ({ onSearch, showBackButton = false }) => 
     const query = e.target.value;
     setSearchQuery(query);
     if (query.length > 1) { // Начинаем искать подсказки после 1 символа
-      const filtered = allKeywords.filter(kw => kw.includes(query.toLowerCase()));
+      const filtered = searchKeywords.filter((kw: string) => kw.includes(query.toLowerCase()));
       // Ограничим количество подсказок для производительности и UI
       setSuggestions(filtered.slice(0, 7)); 
       setShowSuggestions(filtered.length > 0);

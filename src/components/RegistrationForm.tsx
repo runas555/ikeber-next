@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useContext } from 'react';
 import { AppStateContext } from '@/context/AppStateProvider';
-import { User } from '@/data/users'; // Импортируем тип User, usersData больше не нужен для проверок здесь
+import { supabase } from '@/lib/supabase';
 
 interface RegistrationFormProps {
   onSwitchToLogin: () => void; // Функция для переключения на форму входа
@@ -28,26 +28,19 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSwitchToLogin }) 
     }
 
     try {
-      const response = await fetch('/api/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ phoneNumber, password }), // Отправляем phoneNumber и password
+      const { data, error } = await supabase.auth.signUp({
+        phone: phoneNumber,
+        password,
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        setError(data.message || 'Ошибка регистрации. Попробуйте еще раз.');
-      } else {
-        // Пароль не должен храниться в currentUser в состоянии приложения
-        const registeredUser = data.user as User; // Утверждаем тип пользователя из ответа
-        const userToSetAsCurrent = { ...registeredUser };
-        delete userToSetAsCurrent.password; // Удаляем свойство password из копии
-
-        setCurrentUser(userToSetAsCurrent);
-        setSuccess(data.message || 'Регистрация прошла успешно! Вы вошли в систему.');
+      if (error) {
+        setError(error.message || 'Ошибка регистрации. Попробуйте еще раз.');
+      } else if (data.user) {
+        setCurrentUser({
+          id: data.user.id,
+          phoneNumber: data.user.phone || '',
+        });
+        setSuccess('Регистрация прошла успешно! Проверьте SMS для подтверждения.');
         
         // Очистка формы
         setPhoneNumber('');

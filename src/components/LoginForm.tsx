@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useContext } from 'react';
 import { AppStateContext } from '@/context/AppStateProvider';
-import { usersData } from '@/data/users';
+import { supabase } from '@/lib/supabase';
 
 interface LoginFormProps {
   onSwitchToRegister: () => void; // Функция для переключения на форму регистрации
@@ -13,23 +13,30 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister }) => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
-    // Ищем пользователя по номеру телефона и паролю
-    const user = usersData.find(
-      (u) => u.phoneNumber === phoneNumber && u.password === password
-    );
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        phone: phoneNumber,
+        password,
+      });
 
-    if (user) {
-      // Пароль не должен храниться в currentUser в состоянии приложения
-      const userToSetAsCurrent = { ...user };
-      delete userToSetAsCurrent.password; // Удаляем свойство password из копии
-      setCurrentUser(userToSetAsCurrent);
-      setActiveTab('profile'); // Перенаправляем на вкладку профиля после входа
-    } else {
-      setError('Неверный номер телефона или пароль'); // Обновлено сообщение об ошибке
+      if (error) {
+        setError(error.message);
+        return;
+      }
+
+      if (data.user) {
+        setCurrentUser({
+          id: data.user.id,
+          phoneNumber: data.user.phone || '',
+        });
+        setActiveTab('profile');
+      }
+    } catch {
+      setError('Ошибка при входе');
     }
   };
 
