@@ -1,40 +1,61 @@
 "use client";
-import React, { useContext } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Header from '@/components/Header';
 import NavigationBar from '@/components/NavigationBar';
 import ProductCard from '@/components/ProductCard';
-import { itemsData } from '@/data/items'; // Удален Item
+import { supabase } from '@/lib/supabase';
 import { AppStateContext } from '@/context/AppStateProvider';
+import { Item } from '@/types/item';
 
 const CategoryPage: React.FC = () => {
   const router = useRouter();
   const params = useParams();
   const categoryName = params.categoryName ? decodeURIComponent(params.categoryName as string) : null;
+  const [categoryItems, setCategoryItems] = useState<Item[]>([]);
 
   const { setSearchQuery, openSearchOverlay, closeSearchOverlay, setSearchStatusText } = useContext(AppStateContext);
 
-  const performLocalSearch = (query: string) => {
-    if (!query.trim()) return [];
-    const lowerCaseQuery = query.toLowerCase();
-    return itemsData.filter(item => 
-      item.name.toLowerCase().includes(lowerCaseQuery) ||
-      item.category.toLowerCase().includes(lowerCaseQuery) ||
-      item.provider.toLowerCase().includes(lowerCaseQuery) ||
-      item.description.toLowerCase().includes(lowerCaseQuery)
-    );
-  };
+  useEffect(() => {
+    const fetchCategoryItems = async () => {
+      if (!categoryName) return;
+      
+      const { data, error } = await supabase
+        .from('items')
+        .select()
+        .eq('category', categoryName);
 
-  const handleHeaderSearch = (query: string) => {
+      if (error) {
+        console.error('Error fetching category items:', error);
+        return;
+      }
+
+      if (data) {
+        setCategoryItems(data);
+      }
+    };
+
+    fetchCategoryItems();
+  }, [categoryName]);
+
+  const handleHeaderSearch = async (query: string) => {
     if (!query.trim()) {
       console.warn("Search query is empty");
       return;
     }
     setSearchQuery(query);
 
-    const localResults = performLocalSearch(query);
+    const { data, error } = await supabase
+      .from('items')
+      .select()
+      .or(`name.ilike.%${query}%,category.ilike.%${query}%,provider.ilike.%${query}%`);
 
-    if (localResults.length > 0) {
+    if (error) {
+      console.error('Search error:', error);
+      return;
+    }
+
+    if (data && data.length > 0) {
       router.push(`/search/${encodeURIComponent(query)}`);
     } else {
       const searchSteps = [
@@ -58,8 +79,6 @@ const CategoryPage: React.FC = () => {
       setTimeout(nextStep, 1000);
     }
   };
-
-  const categoryItems = categoryName ? itemsData.filter(item => item.category === categoryName) : [];
 
   return (
     <>

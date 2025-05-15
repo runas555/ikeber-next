@@ -1,19 +1,14 @@
 "use client"; // Добавлена директива для клиентского компонента
-import React, { useContext } from 'react'; // Добавлен useContext
+import React, { useContext, useState, useEffect } from 'react';
 import Image from 'next/image';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCartPlus } from '@fortawesome/free-solid-svg-icons';
-import { itemsData, Item } from '@/data/items'; // Предполагается, что данные и тип Item находятся в data/items.ts
+import { supabase } from '@/lib/supabase';
+import { Item } from '@/types/item';
 import Header from '@/components/Header'; // Импорт Header
 import NavigationBar from '@/components/NavigationBar'; // Импорт NavigationBar
 import { AppStateContext } from '@/context/AppStateProvider'; // Импорт AppStateContext
 import { useRouter } from 'next/navigation'; // Импорт useRouter
-
-// Функция для получения данных о продукте по ID
-// В реальном приложении здесь может быть запрос к API
-const getProductById = (id: string): Item | undefined => {
-  return itemsData.find((item: Item) => item.id === parseInt(id));
-};
 
 interface ProductPageProps {
   params: {
@@ -24,29 +19,48 @@ interface ProductPageProps {
 const ProductPage: React.FC<ProductPageProps> = ({ params }) => {
   const router = useRouter();
   const { setSearchQuery, openSearchOverlay, closeSearchOverlay, setSearchStatusText } = useContext(AppStateContext);
-  const product = getProductById(params.id);
+  const [product, setProduct] = useState<Item | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const performLocalSearch = (query: string) => {
-    if (!query.trim()) return [];
-    const lowerCaseQuery = query.toLowerCase();
-    return itemsData.filter(item => 
-      item.name.toLowerCase().includes(lowerCaseQuery) ||
-      item.category.toLowerCase().includes(lowerCaseQuery) ||
-      item.provider.toLowerCase().includes(lowerCaseQuery) ||
-      item.description.toLowerCase().includes(lowerCaseQuery)
-    );
-  };
+  useEffect(() => {
+    const fetchProduct = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('items')
+          .select()
+          .eq('id', params.id)
+          .single();
 
-  const handleHeaderSearch = (query: string) => {
+        if (error) throw error;
+        setProduct(data);
+      } catch (error) {
+        console.error('Error fetching product:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProduct();
+  }, [params.id]);
+
+  const handleHeaderSearch = async (query: string) => {
     if (!query.trim()) {
       console.warn("Search query is empty");
       return;
     }
     setSearchQuery(query); 
 
-    const localResults = performLocalSearch(query);
+    const { data, error } = await supabase
+      .from('items')
+      .select()
+      .or(`name.ilike.%${query}%,category.ilike.%${query}%,provider.ilike.%${query}%`);
 
-    if (localResults.length > 0) {
+    if (error) {
+      console.error('Search error:', error);
+      return;
+    }
+
+    if (data && data.length > 0) {
       router.push(`/search/${encodeURIComponent(query)}`);
     } else {
       const searchSteps = [
@@ -70,6 +84,18 @@ const ProductPage: React.FC<ProductPageProps> = ({ params }) => {
       setTimeout(nextStep, 1000);
     }
   };
+
+  if (isLoading) {
+    return (
+      <>
+        <Header onSearch={handleHeaderSearch} showBackButton={true} />
+        <main className="container mx-auto p-4 pt-4 pb-20">
+          <p>Загрузка...</p>
+        </main>
+        <NavigationBar />
+      </>
+    );
+  }
 
   if (!product) {
     return (
