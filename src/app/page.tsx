@@ -40,7 +40,6 @@ export default function HomePage({ searchParams }: { searchParams: { region?: st
     const { data, error } = await supabase
       .from('items')
       .select()
-      .eq('region', currentRegion)
       .or(`name.ilike.%${query}%,category.ilike.%${query}%,provider.ilike.%${query}%`);
 
     if (error) {
