@@ -1,6 +1,6 @@
 "use client";
 import React from 'react';
-import Link from 'next/link'; // Импортируем Link
+import Link from 'next/link';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { 
   faCouch, 
@@ -11,11 +11,6 @@ import {
   faBookOpen,
   faHeartbeat
 } from '@fortawesome/free-solid-svg-icons';
-
-// interface CategoriesTabProps больше не нужен, так как onCategoryClick удален
-// interface CategoriesTabProps {
-// onCategoryClick: (categoryName: string) => void;
-// }
 
 const categories = [
   { 
@@ -67,15 +62,11 @@ interface CategoriesTabProps {
 }
 
 const CategoriesTab: React.FC<CategoriesTabProps> = ({ region }) => {
-  // Состояния loading и selectedCategory больше не нужны
-
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold text-gray-800 mb-6">Категории товаров</h1>
+    <div className="p-3">
+      <h1 className="text-xl font-bold text-gray-800 mb-4">Категории</h1>
       
-      {/* Индикатор загрузки больше не нужен здесь, так как переход на новую страницу */}
-
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-3 md:grid-cols-4 gap-2">
         {categories.map((category) => (
           <Link
             key={category.name}
@@ -85,16 +76,16 @@ const CategoriesTab: React.FC<CategoriesTabProps> = ({ region }) => {
             }}
             passHref
             className={`
-              flex flex-col items-center p-4 rounded-xl transition-all
+              flex flex-col items-center p-2 rounded-lg transition-all
               ${category.bgColor} ${category.color}
               hover:scale-105 hover:shadow-md
-              focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-400 
+              focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-400
             `}
           >
-            <div className="w-12 h-12 flex items-center justify-center mb-3">
-              <FontAwesomeIcon icon={category.icon} size="2x" />
+            <div className="w-8 h-8 flex items-center justify-center mb-1">
+              <FontAwesomeIcon icon={category.icon} size="lg" />
             </div>
-            <span className="font-medium text-center">{category.name}</span>
+            <span className="text-xs font-medium text-center">{category.name}</span>
           </Link>
         ))}
       </div>
