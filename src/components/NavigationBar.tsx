@@ -1,9 +1,9 @@
 "use client";
-import React, { useContext } from 'react';
-import { useRouter } from 'next/navigation'; // Импортируем useRouter
+import React, { useContext, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHome, faThLarge, faListAlt, faUser } from '@fortawesome/free-solid-svg-icons';
-import { AppStateContext } from '@/context/AppStateProvider'; 
+import { AppStateContext } from '@/context/AppStateProvider';
 
 const tabs = [
   { id: 'home', label: 'Главная', icon: faHome },
@@ -13,42 +13,45 @@ const tabs = [
 ];
 
 const NavigationBar: React.FC = () => {
-  const router = useRouter(); // Инициализируем useRouter
+  const router = useRouter();
   const appState = useContext(AppStateContext);
+  const [isSwitching, setIsSwitching] = useState(false);
 
   if (!appState) {
     console.warn("AppStateContext is not available in NavigationBar");
-    return null; 
+    return null;
   }
 
   const { activeTab, setActiveTab, ordersBadgeCount } = appState;
 
-  const handleTabClick = (tabId: string) => {
-    // Сначала переходим на главную страницу, если мы не на ней
-    // Проверка текущего пути может быть сложной из-за динамических сегментов.
-    // Проще всегда пушить '/', а setActiveTab обновит контент.
-    const currentRegion = new URLSearchParams(window.location.search).get('region') || 'Буздяк';
-    router.push(`/?region=${currentRegion}`);
+  const handleTabClick = async (tabId: string) => {
+    if (isSwitching || tabId === activeTab) return;
     
-    // Устанавливаем активную вкладку.
-    // Небольшая задержка может помочь, если HomePage не успевает среагировать на изменение activeTab
-    // после router.push. Но для начала попробуем без нее.
-    // setActiveTab(tabId);
-    // Для большей надежности, особенно если HomePage имеет сложный рендер:
-    requestAnimationFrame(() => {
+    setIsSwitching(true);
+    
+    try {
+      const currentRegion = new URLSearchParams(window.location.search).get('region') || 'Буздяк';
+      await router.push(`/?region=${currentRegion}`);
+      
+      requestAnimationFrame(() => {
         setActiveTab(tabId);
-    });
+        setTimeout(() => setIsSwitching(false), 300);
+      });
+    } catch {
+      setIsSwitching(false);
+    }
   };
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-top z-40">
-      <div className="flex justify-around"> {/* Удалены max-w-screen-sm и mx-auto */}
+      <div className="flex justify-around">
         {tabs.map((tab) => (
           <button
             key={tab.id}
-            onClick={() => handleTabClick(tab.id)} // Используем новый обработчик
+            onClick={() => handleTabClick(tab.id)}
             className={`flex-1 flex flex-col items-center justify-center py-2 px-1 text-xs transition-colors duration-200 ease-in-out
-                        ${activeTab === tab.id ? 'text-blue-600' : 'text-gray-500 hover:text-blue-500'}`}
+                        ${activeTab === tab.id ? 'text-blue-600' : 'text-gray-500 hover:text-blue-500'}
+                        ${isSwitching ? 'opacity-70 pointer-events-none' : ''}`}
             aria-current={activeTab === tab.id ? 'page' : undefined}
           >
             <div className="relative">
