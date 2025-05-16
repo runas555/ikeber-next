@@ -2,7 +2,7 @@
 import React, { useState, useContext, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faSearch, faArrowLeft, faPaperPlane } from '@fortawesome/free-solid-svg-icons';
+import { faSearch, faArrowLeft, faPaperPlane, faLocationDot } from '@fortawesome/free-solid-svg-icons';
 import { faHeart, faBell } from '@fortawesome/free-regular-svg-icons';
 import { AppStateContext } from '@/context/AppStateProvider';
 import { useRouter } from 'next/navigation';
@@ -44,6 +44,7 @@ const Header: React.FC<HeaderProps> = ({ onSearch, showBackButton = false, onReg
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [searchKeywords, setSearchKeywords] = useState<string[]>([]);
+  const [showRegionDropdown, setShowRegionDropdown] = useState(false);
   const searchContainerRef = useRef<HTMLDivElement>(null); // Для отслеживания кликов вне
 
   const appState = useContext(AppStateContext);
@@ -112,21 +113,35 @@ const Header: React.FC<HeaderProps> = ({ onSearch, showBackButton = false, onReg
         ) : (
           <div className="flex items-center space-x-2">
             <Image src="/ikeber.svg" alt="Local Hub Logo" width={28} height={28} className="text-blue-600" />
-            <select 
-              value={currentRegion}
-              onChange={async (e) => {
-                const newRegion = e.target.value;
-                if (onRegionChange) {
-                  onRegionChange(newRegion);
-                }
-                // Обновляем URL с параметром региона
-                await router.push(`?region=${newRegion}`);
-              }}
-              className="text-sm border border-gray-300 rounded px-2 py-1 bg-white"
-            >
-              <option value="Буздяк">Буздяк</option>
-              <option value="Чекмагуш">Чекмагуш</option>
-            </select>
+            <div className="relative">
+              <button 
+                onClick={() => setShowRegionDropdown(!showRegionDropdown)}
+                className="text-gray-600 hover:text-blue-600 p-1"
+              >
+                <FontAwesomeIcon icon={faLocationDot} className="text-xl" />
+              </button>
+              {showRegionDropdown && (
+                <div className="absolute left-0 top-full mt-1 bg-white border border-gray-300 rounded-md shadow-lg z-50 w-32">
+                  {['Буздяк', 'Чекмагуш'].map((region) => (
+                    <div
+                      key={region}
+                      onClick={async () => {
+                        setShowRegionDropdown(false);
+                        if (onRegionChange) {
+                          onRegionChange(region);
+                        }
+                        await router.push(`?region=${region}`);
+                      }}
+                      className={`px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm ${
+                        currentRegion === region ? 'text-blue-600 font-medium' : 'text-gray-700'
+                      }`}
+                    >
+                      {region}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         )}
 
