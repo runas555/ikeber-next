@@ -85,7 +85,7 @@ const HomeTab: React.FC<HomeTabProps> = ({ onCategoryLinkClick, region }) => {
         <h3 className="text-base font-semibold mb-3 text-gray-700">Что ищем сегодня?</h3>
         <div className="grid grid-cols-4 gap-3 text-center">
           {quickCategories.map(cat => (
-            <button key={cat.name} onClick={() => onCategoryLinkClick(cat.categoryId)}
+            <button key={cat.name} onClick={() => onCategoryLinkClick(`${cat.categoryId}?region=${region}`)}
                     className="flex flex-col items-center p-2 rounded-lg hover:bg-gray-100 transition focus:outline-none focus:ring-2 focus:ring-blue-300">
               <div className={`w-12 h-12 bg-${cat.color}-100 rounded-full flex items-center justify-center mb-1.5`}>
                 <FontAwesomeIcon icon={cat.icon} className={`text-${cat.color}-600 text-lg`} />

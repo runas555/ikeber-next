@@ -1,6 +1,6 @@
 "use client";
 import React, { useContext, useState, useEffect } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useRouter, useParams, useSearchParams } from 'next/navigation';
 import Header from '@/components/Header';
 import NavigationBar from '@/components/NavigationBar';
 import ProductCard from '@/components/ProductCard';
@@ -11,6 +11,8 @@ import { Item } from '@/types/item';
 const CategoryPage: React.FC = () => {
   const router = useRouter();
   const params = useParams();
+  const searchParams = useSearchParams();
+  const region = searchParams.get('region') || 'Буздяк';
   const categoryName = params.categoryName ? decodeURIComponent(params.categoryName as string) : null;
   const [categoryItems, setCategoryItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
@@ -25,7 +27,8 @@ const CategoryPage: React.FC = () => {
         const { data, error } = await supabase
           .from('items')
           .select()
-          .eq('category', categoryName);
+          .eq('category', categoryName)
+          .eq('region', region);
 
         if (error) {
           console.error('Error fetching category items:', error);
@@ -41,7 +44,7 @@ const CategoryPage: React.FC = () => {
     };
 
     fetchCategoryItems();
-  }, [categoryName]);
+  }, [categoryName, region]);
 
   const handleHeaderSearch = async (query: string) => {
     if (!query.trim()) {

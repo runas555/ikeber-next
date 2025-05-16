@@ -79,7 +79,10 @@ const CategoriesTab: React.FC<CategoriesTabProps> = ({ region }) => {
         {categories.map((category) => (
           <Link
             key={category.name}
-            href={`/category/${encodeURIComponent(category.name)}?region=${region}`}
+            href={{
+              pathname: `/category/${encodeURIComponent(category.name)}`,
+              query: { region }
+            }}
             passHref
             className={`
               flex flex-col items-center p-4 rounded-xl transition-all
