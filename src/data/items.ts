@@ -8,7 +8,8 @@ export const itemsData: Item[] = [
     description: 'Стильная подушка с геометрическим рисунком, размер 45x45 см',
     category: 'Декор',
     provider: 'HomeStyle',
-    image: '/images/pillow-geometry.jpg'
+    image: '/images/pillow-geometry.jpg',
+    region: 'Буздяк'
   },
   {
     id: '2',
@@ -17,7 +18,8 @@ export const itemsData: Item[] = [
     description: 'Мягкая подушка с цветочным принтом',
     category: 'Декор',
     provider: 'ComfortHome',
-    image: '/images/pillow-flowers.jpg'
+    image: '/images/pillow-flowers.jpg',
+    region: 'Буздяк'
   },
   {
     id: '3',
@@ -26,6 +28,7 @@ export const itemsData: Item[] = [
     description: '2 подушки в стиле минимализм, серые',
     category: 'Декор',
     provider: 'ModernLife',
-    image: '/images/pillow-set.jpg'
+    image: '/images/pillow-set.jpg',
+    region: 'Буздяк'
   }
 ];

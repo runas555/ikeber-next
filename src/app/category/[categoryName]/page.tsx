@@ -91,7 +91,7 @@ const CategoryPage: React.FC = () => {
   if (loading) {
     return (
       <>
-        <Header onSearch={handleHeaderSearch} showBackButton={true} />
+        <Header onSearch={handleHeaderSearch} showBackButton={true} currentRegion={region} />
         <main className="container mx-auto p-4 pt-4 pb-20">
           <div className="flex justify-center items-center h-64">
             <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500"></div>
@@ -104,7 +104,7 @@ const CategoryPage: React.FC = () => {
 
   return (
     <>
-      <Header onSearch={handleHeaderSearch} showBackButton={true} />
+      <Header onSearch={handleHeaderSearch} showBackButton={true} currentRegion={region} />
       <main className="container mx-auto p-4 pt-4 pb-20"> {/* Изменен pt-14 на pt-4 */}
         <h1 className="text-2xl font-bold mb-6 text-gray-800">
           {categoryName || 'Категория'}

@@ -50,17 +50,15 @@ const ProductCard: React.FC<ProductCardProps> = ({ item, /* onAddToCart, */ clas
             <>
               <span className="text-gray-500 line-through ml-1.5 sm:ml-2 text-[9px] sm:text-xs"> {/* Адаптивный размер шрифта и отступ */}
                 {(() => {
-                  const currentPrice = parseFloat(item.price.replace(/[^0-9.-]+/g,""));
-                  const discountPercentage = parseFloat(item.discount.replace(/[^0-9.-]+/g,""));
-                  if (!isNaN(currentPrice) && !isNaN(discountPercentage) && discountPercentage > 0 && discountPercentage < 100) {
-                    const oldPrice = currentPrice / (1 - discountPercentage / 100);
+                  if (typeof item.discount === 'number' && item.discount > 0 && item.discount < 100) {
+                    const oldPrice = item.price / (1 - item.discount / 100);
                     return `${Math.round(oldPrice)} ₽`;
                   }
                   return '';
                 })()}
               </span>
               <span className="text-red-500 ml-1 sm:ml-1.5 bg-red-100 px-1 rounded text-[9px] sm:text-xs"> {/* Адаптивный размер шрифта и отступ */}
-                -{item.discount}
+                -{item.discount}%
               </span>
             </>
           )}

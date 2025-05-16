@@ -88,7 +88,7 @@ const ProductPage: React.FC<ProductPageProps> = ({ params }) => {
   if (isLoading) {
     return (
       <>
-        <Header onSearch={handleHeaderSearch} showBackButton={true} />
+        <Header onSearch={handleHeaderSearch} showBackButton={true} currentRegion={(product as Item)?.region || 'Буздяк'} />
         <main className="container mx-auto p-4 pt-4 pb-20">
           <div className="flex justify-center items-center h-64">
             <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500"></div>
@@ -102,7 +102,7 @@ const ProductPage: React.FC<ProductPageProps> = ({ params }) => {
   if (!product) {
     return (
       <>
-        <Header onSearch={handleHeaderSearch} showBackButton={true} />
+        <Header onSearch={handleHeaderSearch} showBackButton={true} currentRegion={'Буздяк'} />
         <main className="container mx-auto p-4 pt-4 pb-20"> {/* Изменен pt-14 на pt-4 */}
           <p>Товар не найден</p>
         </main>
@@ -113,7 +113,7 @@ const ProductPage: React.FC<ProductPageProps> = ({ params }) => {
 
   return (
     <>
-      <Header onSearch={handleHeaderSearch} showBackButton={true} />
+      <Header onSearch={handleHeaderSearch} showBackButton={true} currentRegion={product.region || 'Буздяк'} />
       <main className="container mx-auto p-4 pt-4 pb-20"> {/* Изменен pt-14 на pt-4 */}
         <div className="scrollbar-hide"> {/* Удален класс modal-content, его отступы больше не нужны */}
           <Image

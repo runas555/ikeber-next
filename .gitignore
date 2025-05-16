@@ -123,3 +123,5 @@ public
 # Vite build output
 dist/
 dist-ssr/
+
+.vercel

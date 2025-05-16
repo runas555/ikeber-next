@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation';
 import Header from '@/components/Header';
 import NavigationBar from '@/components/NavigationBar';
 import { AppStateContext } from '@/context/AppStateProvider';
-import { itemsData, Item } from '@/data/items'; // Добавлен импорт itemsData и Item
 
 interface SearchRequestPageProps {
   params: {
@@ -32,38 +31,13 @@ const SearchRequestPage: React.FC<SearchRequestPageProps> = ({ params }) => {
     setFormSubmitted(true);
   };
 
-  const performLocalSearch = (query: string): Item[] => { // Добавлен тип возвращаемого значения Item[]
-    if (!query.trim()) return [];
-    const lowerCaseQuery = query.toLowerCase();
-    return itemsData.filter((item: Item) =>  // Добавлен тип item: Item
-      item.name.toLowerCase().includes(lowerCaseQuery) ||
-      item.category.toLowerCase().includes(lowerCaseQuery) ||
-      item.provider.toLowerCase().includes(lowerCaseQuery) ||
-      item.description.toLowerCase().includes(lowerCaseQuery)
-    );
-  };
-
   const handleHeaderSearch = (newQuery: string) => {
     if (!newQuery.trim()) {
       console.warn("Search query is empty");
       return;
     }
-    setSearchQuery(newQuery); // Обновляем глобальный searchQuery
-
-    const localResults = performLocalSearch(newQuery);
-
-    if (localResults.length > 0) {
-      router.push(`/search/${encodeURIComponent(newQuery)}`);
-    } else {
-      // Если мы уже на странице /search-request и локальных результатов нет,
-      // просто обновляем страницу с новым запросом (без SearchOverlay)
-      // или показываем SearchOverlay, если хотим сохранить консистентность.
-      // Для MVP, чтобы избежать зацикливания SearchOverlay, просто перейдем.
-      router.push(`/search-request/${encodeURIComponent(newQuery)}`);
-      // Если нужно показать SearchOverlay и здесь:
-      // openSearchOverlay();
-      // ... (логика с searchSteps)
-    }
+    setSearchQuery(newQuery);
+    router.push(`/search/${encodeURIComponent(newQuery)}`);
   };
 
   const handleClosePage = () => {
@@ -72,7 +46,7 @@ const SearchRequestPage: React.FC<SearchRequestPageProps> = ({ params }) => {
 
   return (
     <>
-      <Header onSearch={handleHeaderSearch} showBackButton={true} />
+      <Header onSearch={handleHeaderSearch} showBackButton={true} currentRegion={'Буздяк'} />
       <main className="container mx-auto p-4 pt-4 pb-20"> {/* Изменен pt-14 на pt-4 */}
         <div className="max-w-lg mx-auto bg-white p-6 md:p-8 rounded-xl shadow-lg">
           {!formSubmitted ? (

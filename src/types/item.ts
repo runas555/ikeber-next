@@ -6,6 +6,7 @@ export interface Item {
   image: string;
   provider: string;
   description: string;
+  region: string;
   discount?: number;
   expiry?: string;
   is_promotion?: boolean;
