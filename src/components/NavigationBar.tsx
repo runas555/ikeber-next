@@ -27,7 +27,8 @@ const NavigationBar: React.FC = () => {
     // Сначала переходим на главную страницу, если мы не на ней
     // Проверка текущего пути может быть сложной из-за динамических сегментов.
     // Проще всегда пушить '/', а setActiveTab обновит контент.
-    router.push('/'); 
+    const currentRegion = new URLSearchParams(window.location.search).get('region') || 'Буздяк';
+    router.push(`/?region=${currentRegion}`);
     
     // Устанавливаем активную вкладку.
     // Небольшая задержка может помочь, если HomePage не успевает среагировать на изменение activeTab

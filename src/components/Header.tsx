@@ -12,6 +12,7 @@ interface HeaderProps {
   onSearch: (query: string) => void;
   showBackButton?: boolean;
   onRegionChange?: (region: string) => void;
+  currentRegion: string;
 }
 
 // Получаем ключевые слова для подсказок из Supabase
@@ -37,8 +38,7 @@ const getSearchKeywords = async () => {
 };
 
 
-const Header: React.FC<HeaderProps> = ({ onSearch, showBackButton = false, onRegionChange }) => {
-  const [currentRegion, setCurrentRegion] = useState('Буздяк');
+const Header: React.FC<HeaderProps> = ({ onSearch, showBackButton = false, onRegionChange, currentRegion }) => {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const [suggestions, setSuggestions] = useState<string[]>([]);
@@ -116,13 +116,11 @@ const Header: React.FC<HeaderProps> = ({ onSearch, showBackButton = false, onReg
               value={currentRegion}
               onChange={async (e) => {
                 const newRegion = e.target.value;
-                setCurrentRegion(newRegion);
                 if (onRegionChange) {
                   onRegionChange(newRegion);
                 }
                 // Обновляем URL с параметром региона
                 await router.push(`?region=${newRegion}`);
-                router.refresh(); // Принудительно обновляем страницу
               }}
               className="text-sm border border-gray-300 rounded px-2 py-1 bg-white"
             >

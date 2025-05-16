@@ -8,21 +8,19 @@ import CategoriesTab from '@/components/tabs/CategoriesTab';
 import OrdersTab from '@/components/tabs/OrdersTab';
 import ProfileTab from '@/components/tabs/ProfileTab';
 import { AppStateContext } from '@/context/AppStateProvider';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 
-export default function HomePage() {
+export default function HomePage({ searchParams }: { searchParams: { region?: string } }) {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const [currentRegion, setCurrentRegion] = useState('Буздяк');
+  const [currentRegion, setCurrentRegion] = useState(searchParams.region || 'Буздяк');
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const region = searchParams.get('region');
-    if (region) {
-      setCurrentRegion(region);
+    if (searchParams.region) {
+      setCurrentRegion(searchParams.region);
     }
-  }, [searchParams]);
+  }, [searchParams.region]);
 
   const {
     activeTab,
@@ -115,7 +113,7 @@ export default function HomePage() {
 
   return (
     <>
-      <Header onSearch={handleSearch} />
+      <Header onSearch={handleSearch} currentRegion={currentRegion} />
       <main className="flex-1 overflow-y-auto pb-20">
         {renderTabContent()}
       </main>
