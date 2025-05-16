@@ -1,12 +1,12 @@
 export interface Item {
-  id: number;
+  id: string;
   name: string;
   category: string;
-  price: string;
+  price: number;
   image: string;
   provider: string;
   description: string;
-  discount?: string;
+  discount?: number;
   expiry?: string;
   is_promotion?: boolean;
   created_at?: string;

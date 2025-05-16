@@ -1,76 +1,106 @@
 "use client";
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Link from 'next/link';
 import Header from '@/components/Header';
 import NavigationBar from '@/components/NavigationBar';
 import ProductCard from '@/components/ProductCard';
-import { itemsData, Item } from '@/data/items';
+import { createSupabaseClient } from '@/lib/supabase';
+import { Item } from '@/types/item';
 import { AppStateContext } from '@/context/AppStateProvider';
 
 const SearchResultsPage: React.FC = () => {
   const router = useRouter();
   const params = useParams();
   const searchQuery = params.query ? decodeURIComponent(params.query as string) : "";
+  const [results, setResults] = useState<Item[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const { 
-    setSearchQuery: setGlobalSearchQuery, // setSearchQuery из контекста переименован во избежание конфликта
+    setSearchQuery: setGlobalSearchQuery,
     openSearchOverlay, 
     closeSearchOverlay, 
-    setSearchStatusText 
+    setSearchStatusText,
+    setIsLoading: setGlobalLoading
   } = useContext(AppStateContext);
 
-  const performLocalSearch = (query: string): Item[] => {
-    if (!query.trim()) return [];
-    const lowerCaseQuery = query.toLowerCase();
-    return itemsData.filter((item: Item) => 
-      item.name.toLowerCase().includes(lowerCaseQuery) ||
-      item.category.toLowerCase().includes(lowerCaseQuery) ||
-      item.provider.toLowerCase().includes(lowerCaseQuery) ||
-      item.description.toLowerCase().includes(lowerCaseQuery)
+  useEffect(() => {
+    const fetchSearchResults = async () => {
+      setGlobalLoading(true);
+      setIsLoading(true);
+      
+      try {
+        const supabase = createSupabaseClient();
+        const { data, error } = await supabase
+          .from('items')
+          .select('*')
+          .or(`name.ilike.%${searchQuery}%,category.ilike.%${searchQuery}%,description.ilike.%${searchQuery}%`);
+
+        if (error) throw error;
+
+        setResults(data || []);
+      } catch (error) {
+        console.error('Search error:', error);
+        setResults([]);
+      } finally {
+        setIsLoading(false);
+        setGlobalLoading(false);
+      }
+    };
+
+    if (searchQuery) {
+      fetchSearchResults();
+    }
+  }, [searchQuery, setGlobalLoading]);
+
+  const handleHeaderSearch = async (newQuery: string) => {
+    if (!newQuery.trim()) return;
+
+    setGlobalSearchQuery(newQuery);
+    setGlobalLoading(true);
+    
+    try {
+      const supabase = createSupabaseClient();
+      const { data, error } = await supabase
+        .from('items')
+        .select('*')
+        .or(`name.ilike.%${newQuery}%,category.ilike.%${newQuery}%,description.ilike.%${newQuery}%`);
+
+      if (error) throw error;
+
+      if (data?.length) {
+        router.push(`/search/${encodeURIComponent(newQuery)}`);
+      } else {
+        openSearchOverlay();
+        setSearchStatusText(`Поиск "${newQuery}"...`);
+        setTimeout(() => {
+          closeSearchOverlay();
+          router.push(`/search-request/${encodeURIComponent(newQuery)}`);
+        }, 2000);
+      }
+    } catch (error) {
+      console.error('Search error:', error);
+    } finally {
+      setGlobalLoading(false);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <>
+        <Header onSearch={handleHeaderSearch} showBackButton={true} />
+        <main className="container mx-auto p-4 pt-4 pb-20">
+          <p className="text-center py-10">Загрузка результатов...</p>
+        </main>
+        <NavigationBar />
+      </>
     );
-  };
-
-  const handleHeaderSearch = (newQuery: string) => {
-    if (!newQuery.trim()) {
-      console.warn("Search query is empty");
-      return;
-    }
-    setGlobalSearchQuery(newQuery); // Обновляем глобальный searchQuery в AppStateContext
-
-    const localResults = performLocalSearch(newQuery);
-
-    if (localResults.length > 0) {
-      router.push(`/search/${encodeURIComponent(newQuery)}`);
-    } else {
-      openSearchOverlay(); 
-      let step = 0;
-      const searchSteps = [
-          { text: "Проверяю наличие у ближайших продавцов...", delay: 1200 },
-          { text: "Ищу похожие товары и услуги в вашем городе...", delay: 1500 },
-          { text: "Подбираю лучшие варианты для вас...", delay: 1300 }
-      ];
-      const nextStep = () => {
-          if (step < searchSteps.length) {
-              setSearchStatusText(searchSteps[step].text);
-              setTimeout(nextStep, searchSteps[step].delay);
-              step++;
-          } else {
-              closeSearchOverlay();
-              router.push(`/search-request/${encodeURIComponent(newQuery)}`);
-          }
-      };
-      setSearchStatusText('Анализирую ваш запрос: "' + newQuery + '"...');
-      setTimeout(nextStep, 1000);
-    }
-  };
-
-  const results = performLocalSearch(searchQuery);
+  }
 
   return (
     <>
       <Header onSearch={handleHeaderSearch} showBackButton={true} />
-      <main className="container mx-auto p-4 pt-4 pb-20"> {/* Изменен pt-14 на pt-4 */}
+      <main className="container mx-auto p-4 pt-4 pb-20">
         <h1 className="text-2xl font-bold mb-2 text-gray-800">
           Результаты поиска: <span className="text-blue-600">{searchQuery}</span>
         </h1>
@@ -88,7 +118,7 @@ const SearchResultsPage: React.FC = () => {
           <div className="text-center py-10">
             <p className="text-xl text-gray-700 mb-4">По вашему запросу ничего не найдено.</p>
             <p className="text-gray-600 mb-6">
-              Вы можете попробовать изменить формулировку запроса или <Link href={`/search-request/${encodeURIComponent(searchQuery)}`} className="text-blue-600 hover:underline font-medium">оставить заявку на глобальный поиск</Link>, и наши специалисты помогут вам.
+              Попробуйте изменить запрос или <Link href={`/search-request/${encodeURIComponent(searchQuery)}`} className="text-blue-600 hover:underline font-medium">оставить заявку на поиск</Link>.
             </p>
           </div>
         )}
