@@ -7,22 +7,25 @@ import HomeTab from '@/components/tabs/HomeTab';
 import CategoriesTab from '@/components/tabs/CategoriesTab';
 import OrdersTab from '@/components/tabs/OrdersTab';
 import ProfileTab from '@/components/tabs/ProfileTab';
-// ProductModal больше не нужен здесь
-// SearchOverlay будет рендериться в layout.tsx
-// SearchResultsContainer больше не нужен здесь
 import { AppStateContext } from '@/context/AppStateProvider';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 
 export default function HomePage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const [currentRegion, setCurrentRegion] = useState('Буздяк');
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const region = searchParams.get('region');
+    if (region) {
+      setCurrentRegion(region);
+    }
+  }, [searchParams]);
+
   const {
     activeTab,
-    // isProductModalOpen, selectedProduct, openProductModal, closeProductModal больше не нужны
-    // isCategoryViewOpen, categoryForView, openCategoryItemsView, closeCategoryItemsView больше не нужны
-    // isSearchOverlayOpen, // Больше не используется в этом файле
-    // searchStatusText, // Больше не используется в этом файле
     setSearchQuery, 
     openSearchOverlay,
     closeSearchOverlay,
@@ -36,10 +39,10 @@ export default function HomePage() {
     }
     setSearchQuery(query);
 
-    // Проверяем наличие товаров в Supabase
     const { data, error } = await supabase
       .from('items')
       .select()
+      .eq('region', currentRegion)
       .or(`name.ilike.%${query}%,category.ilike.%${query}%,provider.ilike.%${query}%`);
 
     if (error) {
@@ -57,7 +60,7 @@ export default function HomePage() {
       ];
       let step = 0;
 
-      const nextStep = () => { // Изменено на стрелочную функцию, объявленную до вызова
+      const nextStep = () => {
         if (step < searchSteps.length) {
           setSearchStatusText(searchSteps[step].text);
           setTimeout(nextStep, searchSteps[step].delay);
@@ -77,22 +80,21 @@ export default function HomePage() {
   const renderTabContent = () => {
     switch (activeTab) {
       case 'home':
-        // onCategoryLinkClick для HomeTab теперь должен вести на страницу категории, если это необходимо,
-        // либо эта логика должна быть пересмотрена. Пока что HomeTab не будет открывать категории.
-        // Если нужно, чтобы "Быстрые категории" на HomeTab вели на страницы категорий,
-        // HomeTab также нужно будет обновить для использования Link.
-        // Для MVP я оставлю HomeTab без этой функциональности, чтобы сфокусироваться на CategoriesTab.
-        // Если потребуется, можно будет добавить onCategoryLinkClick={(categoryName) => router.push(`/category/${encodeURIComponent(categoryName)}`)}
-        return <HomeTab onCategoryLinkClick={(categoryName) => router.push(`/category/${encodeURIComponent(categoryName)}`)} />;
+        return <HomeTab 
+          region={currentRegion}
+          onCategoryLinkClick={(categoryName) => router.push(`/category/${encodeURIComponent(categoryName)}?region=${currentRegion}`)} 
+        />;
       case 'categories':
-        return <CategoriesTab />; // Больше не передаем onCategoryClick
+        return <CategoriesTab region={currentRegion} />;
       case 'orders':
         return <OrdersTab />;
       case 'profile':
         return <ProfileTab />;
       default:
-        // Ветка default должна также использовать router.push для категорий
-        return <HomeTab onCategoryLinkClick={(categoryName) => router.push(`/category/${encodeURIComponent(categoryName)}`)} />;
+        return <HomeTab 
+          region={currentRegion}
+          onCategoryLinkClick={(categoryName) => router.push(`/category/${encodeURIComponent(categoryName)}?region=${currentRegion}`)} 
+        />;
     }
   };
 
@@ -114,14 +116,10 @@ export default function HomePage() {
   return (
     <>
       <Header onSearch={handleSearch} />
-      <main className="flex-1 overflow-y-auto pb-20"> {/* pb-20 for nav bar */}
+      <main className="flex-1 overflow-y-auto pb-20">
         {renderTabContent()}
       </main>
       <NavigationBar />
-
-      {/* ProductModal и CategoryItemsView больше не отображаются здесь */}
-      {/* SearchOverlay теперь будет рендериться в layout.tsx */}
-      {/* SearchResultsContainer больше не отображается здесь */}
     </>
   );
 }

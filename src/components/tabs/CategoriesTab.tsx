@@ -62,7 +62,11 @@ const categories = [
   },
 ];
 
-const CategoriesTab: React.FC = () => { // Удален CategoriesTabProps
+interface CategoriesTabProps {
+  region: string;
+}
+
+const CategoriesTab: React.FC<CategoriesTabProps> = ({ region }) => {
   // Состояния loading и selectedCategory больше не нужны
 
   return (
@@ -75,7 +79,7 @@ const CategoriesTab: React.FC = () => { // Удален CategoriesTabProps
         {categories.map((category) => (
           <Link
             key={category.name}
-            href={`/category/${encodeURIComponent(category.name)}`}
+            href={`/category/${encodeURIComponent(category.name)}?region=${region}`}
             passHref
             className={`
               flex flex-col items-center p-4 rounded-xl transition-all

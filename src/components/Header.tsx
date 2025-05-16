@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useContext, useEffect, useRef } from 'react'; // Добавлены useEffect, useRef
+import React, { useState, useContext, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch, faArrowLeft, faPaperPlane } from '@fortawesome/free-solid-svg-icons';
@@ -11,6 +11,7 @@ import { supabase } from '@/lib/supabase';
 interface HeaderProps {
   onSearch: (query: string) => void;
   showBackButton?: boolean;
+  onRegionChange?: (region: string) => void;
 }
 
 // Получаем ключевые слова для подсказок из Supabase
@@ -36,7 +37,8 @@ const getSearchKeywords = async () => {
 };
 
 
-const Header: React.FC<HeaderProps> = ({ onSearch, showBackButton = false }) => {
+const Header: React.FC<HeaderProps> = ({ onSearch, showBackButton = false, onRegionChange }) => {
+  const [currentRegion, setCurrentRegion] = useState('Буздяк');
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const [suggestions, setSuggestions] = useState<string[]>([]);
@@ -108,7 +110,26 @@ const Header: React.FC<HeaderProps> = ({ onSearch, showBackButton = false }) => 
             <FontAwesomeIcon icon={faArrowLeft} className="text-xl" />
           </button>
         ) : (
-          <Image src="/ikeber.svg" alt="Local Hub Logo" width={28} height={28} className="text-blue-600" />
+          <div className="flex items-center space-x-2">
+            <Image src="/ikeber.svg" alt="Local Hub Logo" width={28} height={28} className="text-blue-600" />
+            <select 
+              value={currentRegion}
+              onChange={async (e) => {
+                const newRegion = e.target.value;
+                setCurrentRegion(newRegion);
+                if (onRegionChange) {
+                  onRegionChange(newRegion);
+                }
+                // Обновляем URL с параметром региона
+                await router.push(`?region=${newRegion}`);
+                router.refresh(); // Принудительно обновляем страницу
+              }}
+              className="text-sm border border-gray-300 rounded px-2 py-1 bg-white"
+            >
+              <option value="Буздяк">Буздяк</option>
+              <option value="Чекмагуш">Чекмагуш</option>
+            </select>
+          </div>
         )}
 
         <div className="relative flex-grow mx-2">

@@ -13,6 +13,7 @@ import ProductCard from '@/components/ProductCard'; // Reusable ProductCard
 interface HomeTabProps {
   // items больше не нужны, получаем из Supabase
   onCategoryLinkClick: (categoryName: string) => void; // For "Что ищем сегодня?"
+  region: string; // Текущий выбранный регион
 }
 
 // Sample data for sections - in a real app, this would come from props or API
@@ -35,24 +36,27 @@ const nearbyProviders = [
 ];
 
 
-const HomeTab: React.FC<HomeTabProps> = ({ onCategoryLinkClick }) => {
+const HomeTab: React.FC<HomeTabProps> = ({ onCategoryLinkClick, region }) => {
   const [loading, setLoading] = useState(true);
   const [recommendedItems, setRecommendedItems] = useState<Item[]>([]);
   const [promotionItems, setPromotionItems] = useState<Item[]>([]);
 
   useEffect(() => {
     const fetchItems = async () => {
+      setLoading(true);
       // Получаем рекомендуемые товары
       const { data: recommendedData } = await supabase
         .from('items')
         .select()
+        .eq('region', region)
         .limit(4);
       
       // Получаем товары по акции
       const { data: promotionData } = await supabase
         .from('items')
         .select()
-        .eq('is_promotion', true);
+        .eq('is_promotion', true)
+        .eq('region', region);
 
       if (recommendedData) setRecommendedItems(recommendedData);
       if (promotionData) setPromotionItems(promotionData);
@@ -60,7 +64,7 @@ const HomeTab: React.FC<HomeTabProps> = ({ onCategoryLinkClick }) => {
     };
 
     fetchItems();
-  }, []);
+  }, [region]); // Добавляем region в зависимости
   const router = useRouter();
 
   return (
