@@ -8,7 +8,7 @@ import { AppStateContext } from '@/context/AppStateProvider';
 const tabs = [
   { id: 'home', label: 'Главная', icon: faHome },
   { id: 'categories', label: 'Категории', icon: faThLarge },
-  { id: 'orders', label: 'Заказы', icon: faListAlt },
+  { id: 'cart', label: 'Корзина', icon: faListAlt },
   { id: 'profile', label: 'Профиль', icon: faUser },
 ];
 
@@ -56,7 +56,7 @@ const NavigationBar: React.FC = () => {
           >
             <div className="relative">
               <FontAwesomeIcon icon={tab.icon} className={`text-xl mb-0.5 tab-icon ${activeTab === tab.id ? 'scale-110' : ''}`} />
-              {tab.id === 'orders' && ordersBadgeCount > 0 && (
+              {tab.id === 'cart' && ordersBadgeCount > 0 && (
                 <span className="absolute top-[-3px] right-[-7px] bg-red-500 text-white text-[9px] font-bold rounded-full h-4 w-4 flex items-center justify-center">
                   {ordersBadgeCount}
                 </span>

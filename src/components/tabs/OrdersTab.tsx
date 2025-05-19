@@ -76,7 +76,7 @@ const statusColors = {
   'Отменен': 'text-red-600 bg-red-100'
 };
 
-const OrdersTab: React.FC = () => {
+const CartTab: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
 
@@ -94,8 +94,8 @@ const OrdersTab: React.FC = () => {
         <div className="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
           <FontAwesomeIcon icon={faTimesCircle} className="text-gray-400 text-3xl" />
         </div>
-        <h3 className="text-lg font-medium text-gray-900">Нет заказов</h3>
-        <p className="mt-1 text-gray-500">У вас пока нет активных или завершенных заказов.</p>
+        <h3 className="text-lg font-medium text-gray-900">Корзина пуста</h3>
+        <p className="mt-1 text-gray-500">Добавьте товары в корзину</p>
         <button className="mt-6 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition">
           Начать покупки
         </button>
@@ -105,7 +105,7 @@ const OrdersTab: React.FC = () => {
 
   return (
     <div className="p-4">
-      <h1 className="text-2xl font-bold text-gray-800 mb-6">Мои заказы</h1>
+      <h1 className="text-2xl font-bold text-gray-800 mb-6">Корзина</h1>
       
       {loading && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -128,7 +128,7 @@ const OrdersTab: React.FC = () => {
             >
               <div className="flex justify-between items-start">
                 <div>
-                  <h3 className="font-bold text-gray-900">Заказ #{order.id}</h3>
+                  <h3 className="font-bold text-gray-900">Товар #{order.id}</h3>
                   <p className="text-sm text-gray-500">{order.date}</p>
                 </div>
                 <div className={`flex items-center text-sm px-3 py-1 rounded-full ${statusColors[order.status]}`}>
@@ -198,4 +198,4 @@ const OrdersTab: React.FC = () => {
   );
 };
 
-export default OrdersTab;
+export default CartTab;

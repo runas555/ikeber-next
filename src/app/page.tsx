@@ -5,7 +5,7 @@ import Header from '@/components/Header';
 import NavigationBar from '@/components/NavigationBar';
 import HomeTab from '@/components/tabs/HomeTab';
 import CategoriesTab from '@/components/tabs/CategoriesTab';
-import OrdersTab from '@/components/tabs/OrdersTab';
+import CartTab from '@/components/tabs/OrdersTab';
 import ProfileTab from '@/components/tabs/ProfileTab';
 import { AppStateContext } from '@/context/AppStateProvider';
 import { useRouter } from 'next/navigation';
@@ -88,8 +88,8 @@ export default function HomePage({ searchParams }: { searchParams: { region?: st
         />;
       case 'categories':
         return <CategoriesTab region={currentRegion} />;
-      case 'orders':
-        return <OrdersTab />;
+      case 'cart':
+        return <CartTab />;
       case 'profile':
         return <ProfileTab />;
       default:
