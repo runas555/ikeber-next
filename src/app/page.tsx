@@ -85,7 +85,6 @@ export default function HomePage({ searchParams }: { searchParams: { region?: st
           recommendedItems={recommendedItems}
           promotionItems={promotionItems}
           isLoading={isLoading}
-          onCategoryLinkClick={(categoryName) => router.push(`/category/${encodeURIComponent(categoryName)}?region=${currentRegion}`)} 
         />;
       case 'categories':
         return <CategoriesTab region={currentRegion} />;
@@ -99,7 +98,6 @@ export default function HomePage({ searchParams }: { searchParams: { region?: st
           recommendedItems={recommendedItems}
           promotionItems={promotionItems}
           isLoading={isLoading}
-          onCategoryLinkClick={(categoryName) => router.push(`/category/${encodeURIComponent(categoryName)}?region=${currentRegion}`)} 
         />;
     }
   };

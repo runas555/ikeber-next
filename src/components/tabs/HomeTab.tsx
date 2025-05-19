@@ -4,26 +4,19 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation'; // Or use AppStateContext to switch tabs/views
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
-  faCouch, faTools, faPalette, faLaptop, faTags, faStar, faChevronRight
+  faTags, faStar, faChevronRight
 } from '@fortawesome/free-solid-svg-icons';
+import CategoriesNavigation from '@/components/CategoriesNavigation';
 import { Item } from '@/types/item';
 import ProductCard from '@/components/ProductCard'; // Reusable ProductCard
 
 interface HomeTabProps {
-  onCategoryLinkClick: (categoryName: string) => void;
   region: string;
   recommendedItems: Item[];
   promotionItems: Item[];
   isLoading: boolean;
 }
 
-// Sample data for sections - in a real app, this would come from props or API
-const quickCategories = [
-  { name: "Для дома", icon: faCouch, color: "blue", categoryId: "Товары для дома" },
-  { name: "Услуги", icon: faTools, color: "green", categoryId: "Ремонт и услуги" },
-  { name: "Хендмейд", icon: faPalette, color: "purple", categoryId: "Хендмейд и творчество" },
-  { name: "Электроника", icon: faLaptop, color: "yellow", categoryId: "Электроника" },
-];
 
 // const promotions = [
 //   { id: 'promo1', title: "Обед со скидкой", provider: 'Кафе "Вкусняшка"', image: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8Zm9vZHxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=400&q=60", discount: "20%", expiry: "до 31 мая" },
@@ -38,7 +31,6 @@ const nearbyProviders = [
 
 
 const HomeTab: React.FC<HomeTabProps> = ({ 
-  onCategoryLinkClick, 
   region,
   recommendedItems,
   promotionItems,
@@ -61,19 +53,11 @@ const HomeTab: React.FC<HomeTabProps> = ({
       </div>
 
       {/* Быстрые категории */}
-      <div className="px-4 pt-2 pb-4">
-        <h3 className="text-base font-semibold mb-3 text-gray-700">Что ищем сегодня?</h3>
-        <div className="grid grid-cols-4 gap-3 text-center">
-          {quickCategories.map(cat => (
-            <button key={cat.name} onClick={() => onCategoryLinkClick(`${cat.categoryId}?region=${region}`)}
-                    className="flex flex-col items-center p-2 rounded-lg hover:bg-gray-100 transition focus:outline-none focus:ring-2 focus:ring-blue-300">
-              <div className={`w-12 h-12 bg-${cat.color}-100 rounded-full flex items-center justify-center mb-1.5`}>
-                <FontAwesomeIcon icon={cat.icon} className={`text-${cat.color}-600 text-lg`} />
-              </div>
-              <span className="text-xs text-gray-600 font-medium">{cat.name}</span>
-            </button>
-          ))}
-        </div>
+      <div className="pt-2">
+        <h3 className="text-base font-semibold mb-1 px-4 text-gray-700">Что ищем сегодня?</h3>
+        <CategoriesNavigation 
+          onSelect={(categoryId) => router.push(`/category/${categoryId}?region=${region}`)}
+        />
       </div>
 
       {/* Акции и скидки */}
