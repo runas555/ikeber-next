@@ -10,10 +10,14 @@ import ProfileTab from '@/components/tabs/ProfileTab';
 import { AppStateContext } from '@/context/AppStateProvider';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
+import { Item } from '@/types/item';
 
 export default function HomePage({ searchParams }: { searchParams: { region?: string } }) {
   const router = useRouter();
   const [currentRegion, setCurrentRegion] = useState(searchParams.region || 'Буздяк');
+  const [recommendedItems, setRecommendedItems] = useState<Item[]>([]);
+  const [promotionItems, setPromotionItems] = useState<Item[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (searchParams.region) {
@@ -78,6 +82,9 @@ export default function HomePage({ searchParams }: { searchParams: { region?: st
       case 'home':
         return <HomeTab 
           region={currentRegion}
+          recommendedItems={recommendedItems}
+          promotionItems={promotionItems}
+          isLoading={isLoading}
           onCategoryLinkClick={(categoryName) => router.push(`/category/${encodeURIComponent(categoryName)}?region=${currentRegion}`)} 
         />;
       case 'categories':
@@ -89,6 +96,9 @@ export default function HomePage({ searchParams }: { searchParams: { region?: st
       default:
         return <HomeTab 
           region={currentRegion}
+          recommendedItems={recommendedItems}
+          promotionItems={promotionItems}
+          isLoading={isLoading}
           onCategoryLinkClick={(categoryName) => router.push(`/category/${encodeURIComponent(categoryName)}?region=${currentRegion}`)} 
         />;
     }
@@ -97,16 +107,27 @@ export default function HomePage({ searchParams }: { searchParams: { region?: st
   useEffect(() => {
     const fetchInitialData = async () => {
       try {
-        // Загружаем данные для главной страницы
-        const { error } = await supabase
+        setIsLoading(true);
+        // Загружаем рекомендуемые товары
+        const { data: recommendedData } = await supabase
           .from('items')
           .select()
           .eq('region', currentRegion)
-          .limit(8);
+          .limit(4);
+        
+        // Загружаем товары по акции
+        const { data: promotionData } = await supabase
+          .from('items')
+          .select()
+          .eq('is_promotion', true)
+          .eq('region', currentRegion);
 
-        if (error) throw error;
+        if (recommendedData) setRecommendedItems(recommendedData);
+        if (promotionData) setPromotionItems(promotionData);
       } catch (error) {
         console.error('Error fetching initial data:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
 

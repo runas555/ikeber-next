@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation'; // Or use AppStateContext to switch tabs/views
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -7,13 +7,14 @@ import {
   faCouch, faTools, faPalette, faLaptop, faTags, faStar, faChevronRight
 } from '@fortawesome/free-solid-svg-icons';
 import { Item } from '@/types/item';
-import { supabase } from '@/lib/supabase';
 import ProductCard from '@/components/ProductCard'; // Reusable ProductCard
 
 interface HomeTabProps {
-  // items больше не нужны, получаем из Supabase
-  onCategoryLinkClick: (categoryName: string) => void; // For "Что ищем сегодня?"
-  region: string; // Текущий выбранный регион
+  onCategoryLinkClick: (categoryName: string) => void;
+  region: string;
+  recommendedItems: Item[];
+  promotionItems: Item[];
+  isLoading: boolean;
 }
 
 // Sample data for sections - in a real app, this would come from props or API
@@ -36,35 +37,14 @@ const nearbyProviders = [
 ];
 
 
-const HomeTab: React.FC<HomeTabProps> = ({ onCategoryLinkClick, region }) => {
-  const [loading, setLoading] = useState(true);
-  const [recommendedItems, setRecommendedItems] = useState<Item[]>([]);
-  const [promotionItems, setPromotionItems] = useState<Item[]>([]);
-
-  useEffect(() => {
-    const fetchItems = async () => {
-      setLoading(true);
-      // Получаем рекомендуемые товары
-      const { data: recommendedData } = await supabase
-        .from('items')
-        .select()
-        .eq('region', region)
-        .limit(4);
-      
-      // Получаем товары по акции
-      const { data: promotionData } = await supabase
-        .from('items')
-        .select()
-        .eq('is_promotion', true)
-        .eq('region', region);
-
-      if (recommendedData) setRecommendedItems(recommendedData);
-      if (promotionData) setPromotionItems(promotionData);
-      setLoading(false);
-    };
-
-    fetchItems();
-  }, [region]); // Добавляем region в зависимости
+const HomeTab: React.FC<HomeTabProps> = ({ 
+  onCategoryLinkClick, 
+  region,
+  recommendedItems,
+  promotionItems,
+  isLoading
+}) => {
+  const loading = isLoading; // Используем переданное состояние загрузки
   const router = useRouter();
 
   return (
