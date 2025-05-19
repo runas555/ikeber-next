@@ -4,37 +4,44 @@ import { AppStateContext } from '@/context/AppStateProvider';
 import { supabase } from '@/lib/supabase';
 
 interface LoginFormProps {
-  onSwitchToRegister: () => void; // Функция для переключения на форму регистрации
+  onSwitchToRegister: () => void;
 }
+
+const validateRussianPhone = (phone: string): boolean => {
+  return /^\+7\d{10}$/.test(phone);
+};
 
 const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister }) => {
   const { setCurrentUser, setActiveTab } = useContext(AppStateContext);
-  const [phoneNumber, setPhoneNumber] = useState(''); // Изменено на phoneNumber
-  const [password, setPassword] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [error, setError] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        phone: phoneNumber,
-        password,
-      });
+    if (!validateRussianPhone(phoneNumber)) {
+      setError('Введите российский номер в формате +7XXXXXXXXXX');
+      return;
+    }
 
-      if (error) {
-        setError(error.message);
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .eq('phone_number', phoneNumber)
+        .single();
+
+      if (error || !data) {
+        setError('Пользователь не найден');
         return;
       }
 
-      if (data.user) {
-        setCurrentUser({
-          id: data.user.id,
-          phoneNumber: data.user.phone || '',
-        });
-        setActiveTab('profile');
-      }
+      setCurrentUser({
+        id: data.id,
+        phoneNumber: data.phone_number,
+      });
+      setActiveTab('profile');
     } catch {
       setError('Ошибка при входе');
     }
@@ -44,31 +51,17 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister }) => {
     <div className="flex flex-col items-center justify-center p-4">
       <h2 className="text-2xl font-bold mb-6">Вход</h2>
       <form onSubmit={handleSubmit} className="w-full max-w-xs">
-        <div className="mb-4">
+        <div className="mb-6">
           <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="login-phoneNumber">
             Номер телефона
           </label>
           <input
             className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
             id="login-phoneNumber"
-            type="tel" // Изменен тип на tel
-            placeholder="+7 (XXX) XXX-XX-XX"
+            type="tel"
+            placeholder="+7XXXXXXXXXX"
             value={phoneNumber}
             onChange={(e) => setPhoneNumber(e.target.value)}
-            required
-          />
-        </div>
-        <div className="mb-6">
-          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="login-password">
-            Пароль
-          </label>
-          <input
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
-            id="password"
-            type="password"
-            placeholder="******************"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
             required
           />
         </div>

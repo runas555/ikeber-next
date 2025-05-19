@@ -4,53 +4,81 @@ import { AppStateContext } from '@/context/AppStateProvider';
 import { supabase } from '@/lib/supabase';
 
 interface RegistrationFormProps {
-  onSwitchToLogin: () => void; // Функция для переключения на форму входа
+  onSwitchToLogin: () => void;
 }
+
+const validateRussianPhone = (phone: string): boolean => {
+  return /^\+7\d{10}$/.test(phone);
+};
 
 const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSwitchToLogin }) => {
   const { setCurrentUser, setActiveTab } = useContext(AppStateContext);
-  const [phoneNumber, setPhoneNumber] = useState(''); // Изменено с username/email
-  const [password, setPassword] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [verificationCode, setVerificationCode] = useState('');
+  const [showCodeInput, setShowCodeInput] = useState(false);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  // Генерируем простой код из номера (последние 4 цифры)
+  const generateSimpleCode = (phone: string) => {
+    return phone.slice(-4);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    setSuccess('');
     setIsLoading(true);
 
-    if (!phoneNumber.trim() || !password.trim()) { // Проверка phoneNumber и password
-      setError('Номер телефона и пароль обязательны для заполнения');
+    if (!validateRussianPhone(phoneNumber)) {
+      setError('Введите российский номер в формате +7XXXXXXXXXX');
       setIsLoading(false);
       return;
     }
 
     try {
-      const { data, error } = await supabase.auth.signUp({
-        phone: phoneNumber,
-        password,
-      });
+      if (!showCodeInput) {
+        // Первый шаг - показываем поле для ввода кода
+        setShowCodeInput(true);
+        setIsLoading(false);
+        return;
+      }
+
+      // Второй шаг - проверка кода
+      const expectedCode = generateSimpleCode(phoneNumber);
+      if (verificationCode !== expectedCode) {
+        setError('Неверный код подтверждения');
+        return;
+      }
+
+      // Проверяем, не зарегистрирован ли уже номер
+      const { data: existingUser } = await supabase
+        .from('users')
+        .select('*')
+        .eq('phone_number', phoneNumber)
+        .single();
+
+      if (existingUser) {
+        setError('Этот номер уже зарегистрирован');
+        return;
+      }
+
+      // Регистрируем нового пользователя
+      const { data, error } = await supabase
+        .from('users')
+        .insert([{ phone_number: phoneNumber }])
+        .select()
+        .single();
 
       if (error) {
-        setError(error.message || 'Ошибка регистрации. Попробуйте еще раз.');
-      } else if (data.user) {
-        setCurrentUser({
-          id: data.user.id,
-          phoneNumber: data.user.phone || '',
-        });
-        setSuccess('Регистрация прошла успешно! Проверьте SMS для подтверждения.');
-        
-        // Очистка формы
-        setPhoneNumber('');
-        setPassword('');
-
-        // Через некоторое время перенаправляем на вкладку профиля
-        setTimeout(() => {
-            setActiveTab('profile');
-        }, 1500);
+        setError('Ошибка регистрации: ' + error.message);
+        return;
       }
+
+      setCurrentUser({
+        id: data.id,
+        phoneNumber: data.phone_number,
+      });
+      setActiveTab('profile');
     } catch (err) {
       console.error('Registration request failed:', err);
       setError('Не удалось подключиться к серверу. Пожалуйста, проверьте ваше соединение.');
@@ -63,38 +91,40 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSwitchToLogin }) 
     <div className="flex flex-col items-center justify-center p-4">
       <h2 className="text-2xl font-bold mb-6">Регистрация</h2>
       <form onSubmit={handleSubmit} className="w-full max-w-xs">
-        <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="reg-phoneNumber">
-            Номер телефона
-          </label>
-          <input
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            id="reg-phoneNumber"
-            type="tel" // Изменен тип на tel
-            placeholder="+7 (XXX) XXX-XX-XX"
-            value={phoneNumber}
-            onChange={(e) => setPhoneNumber(e.target.value)}
-            required
-            disabled={isLoading}
-          />
-        </div>
-        <div className="mb-6">
-          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="reg-password">
-            Пароль
-          </label>
-          <input
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
-            id="reg-password"
-            type="password"
-            placeholder="******************"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            disabled={isLoading}
-          />
-        </div>
+        {!showCodeInput ? (
+          <div className="mb-6">
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="reg-phoneNumber">
+              Номер телефона
+            </label>
+            <input
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              id="reg-phoneNumber"
+              type="tel"
+              placeholder="+7XXXXXXXXXX"
+              value={phoneNumber}
+              onChange={(e) => setPhoneNumber(e.target.value)}
+              required
+              disabled={isLoading}
+            />
+          </div>
+        ) : (
+          <div className="mb-6">
+            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="reg-code">
+              Введите последние 4 цифры номера
+            </label>
+            <input
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              id="reg-code"
+              type="text"
+              placeholder="XXXX"
+              value={verificationCode}
+              onChange={(e) => setVerificationCode(e.target.value)}
+              required
+              disabled={isLoading}
+            />
+          </div>
+        )}
         {error && <p className="text-red-500 text-xs italic mb-4">{error}</p>}
-        {success && <p className="text-green-500 text-xs italic mb-4">{success}</p>}
         <div className="flex flex-col items-center justify-between">
           <button
             className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full mb-3"
