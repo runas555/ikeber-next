@@ -14,7 +14,6 @@ import { supabase } from '@/lib/supabase';
 export default function HomePage({ searchParams }: { searchParams: { region?: string } }) {
   const router = useRouter();
   const [currentRegion, setCurrentRegion] = useState(searchParams.region || 'Буздяк');
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (searchParams.region) {
@@ -96,19 +95,23 @@ export default function HomePage({ searchParams }: { searchParams: { region?: st
   };
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 1000);
-    return () => clearTimeout(timer);
-  }, []);
+    const fetchInitialData = async () => {
+      try {
+        // Загружаем данные для главной страницы
+        const { error } = await supabase
+          .from('items')
+          .select()
+          .eq('region', currentRegion)
+          .limit(8);
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500"></div>
-      </div>
-    );
-  }
+        if (error) throw error;
+      } catch (error) {
+        console.error('Error fetching initial data:', error);
+      }
+    };
+
+    fetchInitialData();
+  }, [currentRegion]);
 
   return (
     <>

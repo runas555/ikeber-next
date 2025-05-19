@@ -103,9 +103,14 @@ const HomeTab: React.FC<HomeTabProps> = ({ onCategoryLinkClick, region }) => {
           <button className="text-amber-600 text-sm font-medium hover:text-amber-800">Все акции →</button>
         </div>
         <div className="flex overflow-x-auto gap-3 pb-2"> {/* Changed to flex container for horizontal scroll */}
-          {promotionItems.map(promo => (
+          {loading ? (
+            <div className="w-full flex justify-center py-4">
+              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+            </div>
+          ) : promotionItems.length > 0 ? (
+            promotionItems.map(promo => (
             // Added width for two items visible by default, and flex-none to prevent shrinking
-            <div key={promo.id} className="item-card bg-white rounded-lg overflow-hidden border border-amber-300 relative cursor-pointer w-[calc(50%-0.375rem)] flex-none" onClick={() => router.push(`/products/${promo.id}`)}>
+              <div key={promo.id} className="item-card bg-white rounded-lg overflow-hidden border border-amber-300 relative cursor-pointer w-[calc(50%-0.375rem)] flex-none" onClick={() => router.push(`/products/${promo.id}`)}>
               <Image src={promo.image} alt={promo.name} width={200} height={112} className="w-full h-28 object-cover" />
               {promo.discount && <span className="text-xs bg-red-500 text-white px-2 py-0.5 rounded-md font-semibold absolute top-2 left-2">-{promo.discount}</span>}
               <div className="p-3">
@@ -114,7 +119,12 @@ const HomeTab: React.FC<HomeTabProps> = ({ onCategoryLinkClick, region }) => {
                 {promo.expiry && <p className="text-xs text-red-600 font-medium mt-1">{promo.expiry}</p>}
               </div>
             </div>
-          ))}
+            ))
+          ) : (
+            <div className="w-full text-center text-gray-500 py-4">
+              Нет акционных товаров
+            </div>
+          )}
         </div>
       </div>
 
