@@ -126,7 +126,39 @@ const ProductPage: React.FC<ProductPageProps> = ({ params }) => {
         />
         <h2 className="text-2xl font-bold mb-2 mt-4 text-center">{product.name}</h2>
         <p className="text-gray-500 text-sm mb-4 text-center">{product.provider}</p>
-        <p className="text-blue-600 font-bold text-lg mb-4 text-center">{product.price}</p>
+        <div className="flex items-center justify-center gap-2 mb-4">
+          <p className="text-green-600 font-bold text-lg">{product.price}</p>
+          {product.discount && (
+            <>
+              <p className="text-gray-500 line-through text-sm">
+                {(() => {
+                  try {
+                    const priceNum = typeof product.price === 'string' 
+                      ? parseFloat(product.price.replace(/[^\d.]/g, '')) 
+                      : Number(product.price);
+                    const discountNum = product.discount 
+                      ? typeof product.discount === 'string'
+                        ? parseFloat(product.discount.replace(/[^\d.]/g, ''))
+                        : Number(product.discount)
+                      : 0;
+
+                    if (!isNaN(discountNum) && !isNaN(priceNum) && 
+                        discountNum > 0 && discountNum < 100 && priceNum > 0) {
+                      const oldPrice = priceNum / (1 - discountNum / 100);
+                      return `${Math.round(oldPrice)} ₽`;
+                    }
+                  } catch (e) {
+                    console.error('Error calculating old price:', e);
+                  }
+                  return '';
+                })()}
+              </p>
+              <p className="text-red-500 bg-red-100 px-2 rounded text-sm">
+                -{typeof product.discount === 'string' ? product.discount : `${product.discount}%`}
+              </p>
+            </>
+          )}
+        </div>
         <button className="w-full max-w-md mx-auto bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center justify-center">
           <FontAwesomeIcon icon={faCartPlus} className="mr-2" />
           Добавить в корзину
