@@ -1,10 +1,13 @@
 'use client';
 
 import React, { useState } from 'react';
+import { YMaps } from '@pbe/react-yandex-maps';
+
 
 const CheckoutForm = () => {
   const [phone, setPhone] = useState('+7');
   const [address, setAddress] = useState('');
+  const yandexMapsApiKey = process.env.NEXT_PUBLIC_YANDEX_MAPS_API_KEY;
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -25,17 +28,35 @@ const CheckoutForm = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!yandexMapsApiKey) {
+      alert('API ключ Яндекс.Карт не настроен. Пожалуйста, добавьте NEXT_PUBLIC_YANDEX_MAPS_API_KEY в ваш .env.local файл.');
+      console.error('Yandex Maps API Key is not configured.');
+      return;
+    }
     // TODO: Implement order submission logic
     console.log('Order submitted:', { phone, address });
     alert('Заказ оформлен!');
   };
 
+  if (!yandexMapsApiKey) {
+    // Отображаем сообщение об ошибке, если ключ не найден на клиенте.
+    // Это предотвратит попытку загрузки YMaps без ключа.
+    return (
+      <div className="p-4 my-4 text-sm text-red-700 bg-red-100 rounded-lg border border-red-300" role="alert">
+        <span className="font-medium">Ошибка конфигурации:</span> API ключ Яндекс.Карт не найден. 
+        Пожалуйста, убедитесь, что переменная <code className="font-mono bg-red-200 px-1 rounded">NEXT_PUBLIC_YANDEX_MAPS_API_KEY</code> 
+        задана в вашем <code className="font-mono bg-red-200 px-1 rounded">.env.local</code> файле.
+      </div>
+    );
+  }
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div>
-        <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
-          Номер телефона
-        </label>
+    <YMaps query={{ apikey: yandexMapsApiKey }}>
+      <form onSubmit={handleSubmit} className="space-y-6">
+        <div>
+          <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
+            Номер телефона
+          </label>
         <div className="mt-1">
           <input
             type="tel"
@@ -57,18 +78,18 @@ const CheckoutForm = () => {
           Адрес доставки
         </label>
         <div className="mt-1">
-          <textarea
-            id="address"
+          <input
+            type="text"
             name="address"
-            rows={3}
+            id="address"
             value={address}
             onChange={(e) => setAddress(e.target.value)}
-            required
             className="block w-full shadow-sm sm:text-sm border-gray-300 rounded-md p-2"
+            placeholder="Введите адрес вручную"
           />
         </div>
         <p className="mt-2 text-sm text-gray-500">
-          Например: г. Москва, ул. Ленина, д. 10, кв. 5
+          Введите адрес доставки
         </p>
       </div>
 
@@ -81,6 +102,7 @@ const CheckoutForm = () => {
         </button>
       </div>
     </form>
+  </YMaps>
   );
 };
 
