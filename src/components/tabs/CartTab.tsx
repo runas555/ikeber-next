@@ -1,5 +1,6 @@
 "use client";
 import React, { useContext } from 'react';
+import { useRouter } from 'next/navigation'; // Добавляем импорт useRouter
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faTimesCircle,
@@ -15,6 +16,7 @@ const CartTab: React.FC = () => {
     setCart: () => {},
     setOrdersBadgeCount: () => {}
   };
+  const router = useRouter(); // Инициализируем useRouter
 
   const updateQuantity = (itemId: string, newQuantity: number) => {
     if (newQuantity < 1) return;
@@ -128,7 +130,10 @@ const CartTab: React.FC = () => {
               <p className="text-sm text-gray-500">Общая сумма</p>
               <p className="text-xl font-bold">{totalSum} ₽</p>
             </div>
-            <button className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+            <button 
+              onClick={() => router.push('/checkout')} // Добавляем навигацию
+              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+            >
               Оформить заказ
             </button>
           </div>
