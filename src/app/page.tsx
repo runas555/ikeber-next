@@ -10,16 +10,16 @@ import ProfileTab from '@/components/tabs/ProfileTab';
 import { AppStateContext } from '@/context/AppStateProvider';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
-import { Item } from '@/types/item';
+// import { Item } from '@/types/item'; // Удалено, так как типы приходят из контекста
 
 export default function HomePage({ searchParams }: { searchParams: { region?: string } }) {
   const router = useRouter();
   const [currentRegion, setCurrentRegion] = useState(searchParams.region || 'Буздяк');
-  const [recommendedItems, setRecommendedItems] = useState<Item[]>([]);
-  const [promotionItems, setPromotionItems] = useState<Item[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
+  // const [recommendedItems, setRecommendedItems] = useState<Item[]>([]); // Удалено, будет из контекста
+  // const [promotionItems, setPromotionItems] = useState<Item[]>([]); // Удалено, будет из контекста
+  // const [isLoading, setIsLoading] = useState(true); // Удалено, будет itemsLoading из контекста
+  // const [page, setPage] = useState(1); // Удалено, будет itemsPage из контекста
+  // const [hasMore, setHasMore] = useState(true); // Удалено, будет hasMoreItems из контекста
   const perPage = 4; // Количество товаров за одну загрузку
 
   useEffect(() => {
@@ -30,10 +30,18 @@ export default function HomePage({ searchParams }: { searchParams: { region?: st
 
   const {
     activeTab,
-    setSearchQuery, 
+    setSearchQuery,
     openSearchOverlay,
     closeSearchOverlay,
     setSearchStatusText,
+    // Состояния и функции для товаров из контекста
+    recommendedItems,
+    promotionItems,
+    itemsLoading,
+    hasMoreItems,
+    fetchInitialItems,
+    loadMoreProviderItems,
+    currentRegionForItems, // Для проверки, нужно ли перезагружать данные
   } = useContext(AppStateContext);
 
   const handleSearch = async (query: string) => {
@@ -87,9 +95,9 @@ export default function HomePage({ searchParams }: { searchParams: { region?: st
           region={currentRegion}
           recommendedItems={recommendedItems}
           promotionItems={promotionItems}
-          isLoading={isLoading}
+          isLoading={itemsLoading} // Используем itemsLoading из контекста
           onLoadMore={loadMoreItems}
-          hasMore={hasMore}
+          hasMore={hasMoreItems} // Используем hasMoreItems из контекста
         />;
       case 'categories':
         return <CategoriesTab region={currentRegion} />;
@@ -102,74 +110,27 @@ export default function HomePage({ searchParams }: { searchParams: { region?: st
           region={currentRegion}
           recommendedItems={recommendedItems}
           promotionItems={promotionItems}
-          isLoading={isLoading}
+          isLoading={itemsLoading} // Используем itemsLoading из контекста
           onLoadMore={loadMoreItems}
-          hasMore={hasMore}
+          hasMore={hasMoreItems} // Используем hasMoreItems из контекста
         />;
     }
   };
 
   const loadMoreItems = async () => {
-    if (!hasMore || isLoading) return;
-    
-    setIsLoading(true);
-    try {
-      const nextPage = page + 1;
-      const { data: newItems } = await supabase
-        .from('items')
-        .select()
-        .eq('region', currentRegion)
-        .range((nextPage - 1) * perPage, nextPage * perPage - 1);
-
-      if (newItems && newItems.length > 0) {
-        setRecommendedItems(prev => [...prev, ...newItems]);
-        setPage(nextPage);
-        setHasMore(newItems.length >= perPage);
-      } else {
-        setHasMore(false);
-      }
-    } catch (error) {
-      console.error('Error loading more items:', error);
-    } finally {
-      setIsLoading(false);
+    // Вызываем функцию из контекста
+    if (currentRegion) { // Убедимся, что регион определен
+      await loadMoreProviderItems(currentRegion, perPage);
     }
   };
 
   useEffect(() => {
-    const fetchInitialData = async () => {
-      try {
-        setIsLoading(true);
-        setPage(1);
-        setHasMore(true);
-        
-        // Загружаем первую страницу рекомендуемых товаров
-        const { data: recommendedData } = await supabase
-          .from('items')
-          .select()
-          .eq('region', currentRegion)
-          .range(0, perPage - 1);
-        
-        // Загружаем товары по акции (все сразу)
-        const { data: promotionData } = await supabase
-          .from('items')
-          .select()
-          .eq('is_promotion', true)
-          .eq('region', currentRegion);
-
-        if (recommendedData) {
-          setRecommendedItems(recommendedData);
-          setHasMore(recommendedData.length >= perPage);
-        }
-        if (promotionData) setPromotionItems(promotionData);
-      } catch (error) {
-        console.error('Error fetching initial data:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchInitialData();
-  }, [currentRegion]);
+    // Вызываем функцию из контекста для начальной загрузки,
+    // только если регион изменился или данные еще не загружены для текущего региона
+    if (currentRegion && (currentRegionForItems !== currentRegion || recommendedItems.length === 0)) {
+      fetchInitialItems(currentRegion, perPage);
+    }
+  }, [currentRegion, fetchInitialItems, currentRegionForItems, recommendedItems.length, perPage]);
 
   return (
     <>
