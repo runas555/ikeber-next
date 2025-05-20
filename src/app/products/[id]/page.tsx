@@ -2,7 +2,8 @@
 import React, { useContext, useState, useEffect } from 'react';
 import Image from 'next/image';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCartPlus } from '@fortawesome/free-solid-svg-icons';
+import { faCartPlus, faMoneyBillWave } from '@fortawesome/free-solid-svg-icons'; // Добавлена иконка faMoneyBillWave
+import { faWhatsapp } from '@fortawesome/free-brands-svg-icons'; // Импорт иконки WhatsApp
 import { supabase } from '@/lib/supabase';
 import { Item } from '@/types/item';
 import Header from '@/components/Header'; // Импорт Header
@@ -142,7 +143,19 @@ const ProductPage: React.FC<ProductPageProps> = ({ params }) => {
               className="rounded-full"
             />
           </div>
-          <p className="text-gray-500 text-sm text-center">{product.provider}</p>
+          <p className="text-gray-500 text-sm text-center mr-2">{product.provider}</p> {/* Добавлен mr-2 для отступа */}
+          {/* Иконка WhatsApp рядом с провайдером */}
+          <button
+            className="text-green-500 hover:text-green-600 transition-colors"
+            onClick={() => {
+              const phoneNumber = "79177762863";
+              const message = encodeURIComponent(`Я хочу "${product?.name}"`);
+              window.open(`https://wa.me/${phoneNumber}?text=${message}`, '_blank');
+            }}
+            title="Написать в WhatsApp"
+          >
+            <FontAwesomeIcon icon={faWhatsapp} className="h-5 w-5" />
+          </button>
         </div>
         <div className="flex items-center justify-center gap-2 mb-4">
           <p className="text-green-600 font-bold text-lg">
@@ -150,7 +163,7 @@ const ProductPage: React.FC<ProductPageProps> = ({ params }) => {
           </p>
           {product.discount && (
             <>
-              <p className="text-gray-500 line-through text-sm">
+              <p className="text-gray-500 line-through text-sm ml-2"> 
                 {(() => {
                   try {
                     const priceNum = typeof product.price === 'string' 
@@ -178,6 +191,14 @@ const ProductPage: React.FC<ProductPageProps> = ({ params }) => {
               </p>
             </>
           )}
+          {/* Кнопка "Оплата при получении" */}
+          <button
+            className="ml-2 flex items-center text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded-md hover:bg-gray-200 transition-colors"
+            title="Оплата при получении"
+          >
+            <FontAwesomeIcon icon={faMoneyBillWave} className="mr-1 h-3 w-3" />
+            Оплата при получении
+          </button>
         </div>
         <button 
           className="w-full max-w-md mx-auto bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center justify-center"
@@ -192,6 +213,8 @@ const ProductPage: React.FC<ProductPageProps> = ({ params }) => {
           <FontAwesomeIcon icon={faCartPlus} className="mr-2" />
           Добавить в корзину
         </button>
+        {/* Кнопка WhatsApp удалена отсюда, т.к. перемещена к провайдеру */}
+        {/* <p className="text-sm text-gray-600 mt-2 text-center max-w-md mx-auto">Оплата при получении</p> Удалено, т.к. перемещено к цене */}
         <div className="mt-6 max-w-md mx-auto">
           <h3 className="font-semibold mb-2 text-xl">Описание</h3>
           <div className="pr-2">
