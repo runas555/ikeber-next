@@ -3,9 +3,7 @@ import React from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation'; // Or use AppStateContext to switch tabs/views
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faTags, faStar, faChevronRight
-} from '@fortawesome/free-solid-svg-icons';
+import { faTags } from '@fortawesome/free-solid-svg-icons';
 import CategoriesNavigation from '@/components/CategoriesNavigation';
 import { Item } from '@/types/item';
 import ProductCard from '@/components/ProductCard'; // Reusable ProductCard
@@ -22,12 +20,6 @@ interface HomeTabProps {
 //   { id: 'promo1', title: "Обед со скидкой", provider: 'Кафе "Вкусняшка"', image: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8Zm9vZHxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=400&q=60", discount: "20%", expiry: "до 31 мая" },
 //   { id: 'promo2', title: "Гаджет недели", provider: 'Магазин "ТехноМир"', image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8cHJvZHVjdHxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=400&q=60", discount: "15%", expiry: "до 25 мая" },
 // ];
-
-const nearbyProviders = [
-    { id: 'prov1', name: 'Магазин "Уютный Дом"', type: "Товары для дома", rating: 4.8, delivery: "Доставка от 99 ₽ • ~ 1.5 км", image: "https://images.unsplash.com/photo-1556157382-97eda2d62296?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Nnx8c2hvcHxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=100&q=60" },
-    { id: 'prov2', name: 'Сергей П. - Электрик', type: "Ремонтные услуги", rating: 5.0, delivery: "Выезд на дом • ~ 2 км", image: "https://images.unsplash.com/photo-1581091226809-5003d1eh3e7c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTF8fHJlcGFpcm1hbnxlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&w=100&q=60" },
-    { id: 'prov3', name: 'Студия "ГлинаАрт"', type: "Хендмейд, Мастер-классы", rating: 4.9, delivery: "Доставка от 149 ₽ • ~ 0.8 км", image: "https://images.unsplash.com/photo-1576495199011-b61cdc8dde5e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTF8fHBvdHRlcnl8ZW58MHx8MHx8fDA%3D%3D&auto=format&fit=crop&w=100&q=60" },
-];
 
 
 const HomeTab: React.FC<HomeTabProps> = ({ 
@@ -115,29 +107,6 @@ const HomeTab: React.FC<HomeTabProps> = ({
         </div>
       </div>
 
-      {/* Мастера и магазины рядом */}
-      <div className="px-4 py-4">
-        <div className="flex justify-between items-center mb-3">
-            <h2 className="text-lg font-semibold text-gray-800">Мастера и магазины рядом</h2>
-            <button className="text-blue-600 text-sm font-medium hover:text-blue-800">Все →</button>
-        </div>
-        <div className="space-y-3">
-            {nearbyProviders.map(provider => (
-                <div key={provider.id} className="flex items-center bg-white rounded-lg p-3 border border-gray-200 provider-card cursor-pointer">
-                    <Image src={provider.image} alt={provider.name} width={48} height={48} className="w-12 h-12 rounded-lg object-cover mr-3" />
-                    <div className="flex-1">
-                        <h3 className="font-medium text-sm text-gray-800">{provider.name}</h3>
-                        <div className="flex items-center mt-1 text-xs text-gray-500 space-x-2">
-                            <span>{provider.type}</span>
-                            <span className="text-yellow-500"><FontAwesomeIcon icon={faStar} className="text-xs" /> {provider.rating.toFixed(1)}</span>
-                        </div>
-                        <p className="text-xs text-gray-400 mt-0.5">{provider.delivery}</p>
-                    </div>
-                    <FontAwesomeIcon icon={faChevronRight} className="text-gray-400 ml-2" />
-                </div>
-            ))}
-        </div>
-      </div>
     </div>
   );
 };
