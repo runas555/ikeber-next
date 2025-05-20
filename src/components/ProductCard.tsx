@@ -31,7 +31,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ item, /* onAddToCart, */ clas
         className={`item-card bg-white rounded-lg overflow-hidden cursor-pointer ${className}`} // cursor-pointer теперь всегда
         data-item-id={item.id}
       >
-        <div className="relative w-full h-32"> {/* Container for Image */}
+        <div className="relative w-full h-48"> {/* Container for Image - увеличенная высота */}
           <Image
             src={item.image}
           alt={item.name}
@@ -41,16 +41,16 @@ const ProductCard: React.FC<ProductCardProps> = ({ item, /* onAddToCart, */ clas
           className="transform group-hover:scale-105 transition-transform duration-300" // Example hover effect
         />
       </div>
-      <div className="p-2 sm:p-3"> {/* Уменьшен padding для маленьких экранов */}
-        <h3 className="font-semibold text-xs sm:text-sm text-gray-800 truncate" title={item.name}>{item.name}</h3> {/* Адаптивный размер шрифта */}
-        <p className="text-[10px] sm:text-xs text-gray-500 mt-0.5 truncate" title={item.provider}>{item.provider}</p> {/* Адаптивный размер шрифта */}
-        <div className="flex items-baseline mt-1 sm:mt-2"> {/* Убрал justify-between, чтобы цена и скидка были вместе */}
-          <span className="font-bold text-green-600 text-[11px] sm:text-sm">
+      <div className="p-3 sm:p-4"> {/* Увеличен padding */}
+        <h3 className="font-semibold text-sm sm:text-base text-gray-800 truncate" title={item.name}>{item.name}</h3> {/* Увеличенный размер шрифта */}
+        <p className="text-xs sm:text-sm text-gray-500 mt-1 truncate" title={item.provider}>{item.provider}</p> {/* Увеличенный размер шрифта */}
+        <div className="flex items-baseline mt-2 sm:mt-3"> {/* Увеличенные отступы */}
+          <span className="font-bold text-green-600 text-sm sm:text-base">
             {item.is_service ? `от ${item.price} ₽` : `${item.price} ₽`}
           </span> {/* Адаптивный размер шрифта */}
           {item.discount && (
             <>
-              <span className="text-gray-500 line-through ml-1.5 sm:ml-2 text-[9px] sm:text-xs"> {/* Адаптивный размер шрифта и отступ */}
+              <span className="text-gray-500 line-through ml-1.5 sm:ml-2 text-xs sm:text-sm"> {/* Увеличенный размер шрифта */}
                 {(() => {
                   try {
                     // Получаем числовое значение цены
@@ -77,7 +77,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ item, /* onAddToCart, */ clas
                   return '';
                 })()}
               </span>
-              <span className="text-red-500 ml-1 sm:ml-1.5 bg-red-100 px-1 rounded text-[9px] sm:text-xs"> {/* Адаптивный размер шрифта и отступ */}
+              <span className="text-red-500 ml-1 sm:ml-1.5 bg-red-100 px-1 rounded text-xs sm:text-sm"> {/* Увеличенный размер шрифта */}
                 -{typeof item.discount === 'string' ? item.discount : `${item.discount}%`}
               </span>
             </>
