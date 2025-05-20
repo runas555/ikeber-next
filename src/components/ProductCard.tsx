@@ -84,6 +84,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ item, /* onAddToCart, */ clas
           )}
         </div>
         {/* Кнопка добавления в корзину удалена */}
+        <button className="bg-blue-500 text-white rounded p-2 text-xs w-full mt-2">
+          Доставка сегодня
+        </button>
       </div>
     </div>
     </Link>
