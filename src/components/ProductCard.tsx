@@ -43,7 +43,19 @@ const ProductCard: React.FC<ProductCardProps> = ({ item, /* onAddToCart, */ clas
       </div>
       <div className="p-3 sm:p-4"> {/* Увеличен padding */}
         <h3 className="font-semibold text-sm sm:text-base text-gray-800 truncate" title={item.name}>{item.name}</h3> {/* Увеличенный размер шрифта */}
-        <p className="text-xs sm:text-sm text-gray-500 mt-1 truncate" title={item.provider}>{item.provider}</p> {/* Увеличенный размер шрифта */}
+        <div className="flex items-center mt-1">
+          <div className="relative w-5 h-5 mr-1"> {/* Контейнер для аватарки */}
+            <Image
+              src="https://images.unsplash.com/photo-1599305445671-ac291c95aaa9?q=80&w=2069&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" // Временная аватарка с Unsplash
+              alt="Provider Avatar"
+              fill
+              sizes="20px"
+              style={{ objectFit: 'cover', borderRadius: '50%' }}
+              className="rounded-full" // Tailwind класс для круглого изображения
+            />
+          </div>
+          <p className="text-xs sm:text-sm text-gray-500 truncate" title={item.provider}>{item.provider}</p> {/* Увеличенный размер шрифта */}
+        </div>
         <div className="flex items-baseline mt-2 sm:mt-3"> {/* Увеличенные отступы */}
           <span className="font-bold text-green-600 text-sm sm:text-base">
             {item.is_service ? `от ${item.price} ₽` : `${item.price} ₽`}
