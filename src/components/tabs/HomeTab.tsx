@@ -13,6 +13,8 @@ interface HomeTabProps {
   recommendedItems: Item[];
   promotionItems: Item[];
   isLoading: boolean;
+  onLoadMore: () => void;
+  hasMore: boolean;
 }
 
 
@@ -26,10 +28,34 @@ const HomeTab: React.FC<HomeTabProps> = ({
   region,
   recommendedItems,
   promotionItems,
-  isLoading
+  isLoading,
+  onLoadMore,
+  hasMore
 }) => {
   const loading = isLoading; // Используем переданное состояние загрузки
   const router = useRouter();
+  const loaderRef = React.useRef<HTMLDivElement>(null);
+
+  React.useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasMore && !isLoading) {
+          onLoadMore();
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    if (loaderRef.current) {
+      observer.observe(loaderRef.current);
+    }
+
+    return () => {
+      if (loaderRef.current) {
+        observer.unobserve(loaderRef.current);
+      }
+    };
+  }, [hasMore, isLoading, onLoadMore]);
 
   return (
     <div id="home-tab" className="tab-content active"> {/* 'active' class can be removed if parent controls visibility */}
@@ -91,14 +117,30 @@ const HomeTab: React.FC<HomeTabProps> = ({
           <button className="text-blue-600 text-sm font-medium hover:text-blue-800">Все →</button>
         </div>
         <div className="grid grid-cols-2 gap-3">
-          {loading ? (
+          {loading && recommendedItems.length === 0 ? (
             <div className="col-span-2 flex justify-center py-4">
               <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
             </div>
           ) : recommendedItems.length > 0 ? (
-            recommendedItems.map((item: Item) => (
-              <ProductCard key={item.id} item={item} />
-            ))
+            <>
+              {recommendedItems.map((item: Item) => (
+                <ProductCard key={item.id} item={item} />
+              ))}
+              {hasMore && (
+                <div className="col-span-2 flex justify-center py-4" ref={loaderRef}>
+                  {isLoading ? (
+                    <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+                  ) : (
+                    <button 
+                      onClick={onLoadMore}
+                      className="text-blue-600 text-sm font-medium hover:text-blue-800"
+                    >
+                      Загрузить еще
+                    </button>
+                  )}
+                </div>
+              )}
+            </>
           ) : (
             <div className="col-span-2 text-center text-gray-500 py-4">
               Нет рекомендуемых товаров

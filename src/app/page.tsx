@@ -18,6 +18,9 @@ export default function HomePage({ searchParams }: { searchParams: { region?: st
   const [recommendedItems, setRecommendedItems] = useState<Item[]>([]);
   const [promotionItems, setPromotionItems] = useState<Item[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const perPage = 4; // Количество товаров за одну загрузку
 
   useEffect(() => {
     if (searchParams.region) {
@@ -85,6 +88,8 @@ export default function HomePage({ searchParams }: { searchParams: { region?: st
           recommendedItems={recommendedItems}
           promotionItems={promotionItems}
           isLoading={isLoading}
+          onLoadMore={loadMoreItems}
+          hasMore={hasMore}
         />;
       case 'categories':
         return <CategoriesTab region={currentRegion} />;
@@ -98,7 +103,35 @@ export default function HomePage({ searchParams }: { searchParams: { region?: st
           recommendedItems={recommendedItems}
           promotionItems={promotionItems}
           isLoading={isLoading}
+          onLoadMore={loadMoreItems}
+          hasMore={hasMore}
         />;
+    }
+  };
+
+  const loadMoreItems = async () => {
+    if (!hasMore || isLoading) return;
+    
+    setIsLoading(true);
+    try {
+      const nextPage = page + 1;
+      const { data: newItems } = await supabase
+        .from('items')
+        .select()
+        .eq('region', currentRegion)
+        .range((nextPage - 1) * perPage, nextPage * perPage - 1);
+
+      if (newItems && newItems.length > 0) {
+        setRecommendedItems(prev => [...prev, ...newItems]);
+        setPage(nextPage);
+        setHasMore(newItems.length >= perPage);
+      } else {
+        setHasMore(false);
+      }
+    } catch (error) {
+      console.error('Error loading more items:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -106,21 +139,27 @@ export default function HomePage({ searchParams }: { searchParams: { region?: st
     const fetchInitialData = async () => {
       try {
         setIsLoading(true);
-        // Загружаем рекомендуемые товары
+        setPage(1);
+        setHasMore(true);
+        
+        // Загружаем первую страницу рекомендуемых товаров
         const { data: recommendedData } = await supabase
           .from('items')
           .select()
           .eq('region', currentRegion)
-          .limit(4);
+          .range(0, perPage - 1);
         
-        // Загружаем товары по акции
+        // Загружаем товары по акции (все сразу)
         const { data: promotionData } = await supabase
           .from('items')
           .select()
           .eq('is_promotion', true)
           .eq('region', currentRegion);
 
-        if (recommendedData) setRecommendedItems(recommendedData);
+        if (recommendedData) {
+          setRecommendedItems(recommendedData);
+          setHasMore(recommendedData.length >= perPage);
+        }
         if (promotionData) setPromotionItems(promotionData);
       } catch (error) {
         console.error('Error fetching initial data:', error);
