@@ -127,7 +127,9 @@ const ProductPage: React.FC<ProductPageProps> = ({ params }) => {
         <h2 className="text-2xl font-bold mb-2 mt-4 text-center">{product.name}</h2>
         <p className="text-gray-500 text-sm mb-4 text-center">{product.provider}</p>
         <div className="flex items-center justify-center gap-2 mb-4">
-          <p className="text-green-600 font-bold text-lg">{product.price}</p>
+          <p className="text-green-600 font-bold text-lg">
+            {product.is_service ? `от ${product.price} ₽` : `${product.price} ₽`}
+          </p>
           {product.discount && (
             <>
               <p className="text-gray-500 line-through text-sm">
@@ -145,7 +147,7 @@ const ProductPage: React.FC<ProductPageProps> = ({ params }) => {
                     if (!isNaN(discountNum) && !isNaN(priceNum) && 
                         discountNum > 0 && discountNum < 100 && priceNum > 0) {
                       const oldPrice = priceNum / (1 - discountNum / 100);
-                      return `${Math.round(oldPrice)} ₽`;
+                      return `${Math.round(oldPrice)}`;
                     }
                   } catch (e) {
                     console.error('Error calculating old price:', e);

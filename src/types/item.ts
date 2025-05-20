@@ -10,5 +10,6 @@ export interface Item {
   discount?: number | string;
   expiry?: string;
   is_promotion?: boolean;
+  is_service?: boolean;
   created_at?: string;
 }

@@ -45,7 +45,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ item, /* onAddToCart, */ clas
         <h3 className="font-semibold text-xs sm:text-sm text-gray-800 truncate" title={item.name}>{item.name}</h3> {/* Адаптивный размер шрифта */}
         <p className="text-[10px] sm:text-xs text-gray-500 mt-0.5 truncate" title={item.provider}>{item.provider}</p> {/* Адаптивный размер шрифта */}
         <div className="flex items-baseline mt-1 sm:mt-2"> {/* Убрал justify-between, чтобы цена и скидка были вместе */}
-          <span className="font-bold text-green-600 text-[11px] sm:text-sm">{item.price}</span> {/* Адаптивный размер шрифта */}
+          <span className="font-bold text-green-600 text-[11px] sm:text-sm">
+            {item.is_service ? `от ${item.price} ₽` : `${item.price} ₽`}
+          </span> {/* Адаптивный размер шрифта */}
           {item.discount && (
             <>
               <span className="text-gray-500 line-through ml-1.5 sm:ml-2 text-[9px] sm:text-xs"> {/* Адаптивный размер шрифта и отступ */}
@@ -67,7 +69,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ item, /* onAddToCart, */ clas
                     if (!isNaN(discountNum) && !isNaN(priceNum) && 
                         discountNum > 0 && discountNum < 100 && priceNum > 0) {
                       const oldPrice = priceNum / (1 - discountNum / 100);
-                      return `${Math.round(oldPrice)} ₽`;
+                      return `${Math.round(oldPrice)}`;
                     }
                   } catch (e) {
                     console.error('Error calculating old price:', e);
