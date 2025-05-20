@@ -5,7 +5,7 @@ import Header from '@/components/Header';
 import NavigationBar from '@/components/NavigationBar';
 import HomeTab from '@/components/tabs/HomeTab';
 import CategoriesTab from '@/components/tabs/CategoriesTab';
-import CartTab from '@/components/tabs/OrdersTab';
+import CartTab from '@/components/tabs/CartTab';
 import ProfileTab from '@/components/tabs/ProfileTab';
 import { AppStateContext } from '@/context/AppStateProvider';
 import { useRouter } from 'next/navigation';

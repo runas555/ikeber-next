@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import React, { useContext } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
   faTimesCircle,
@@ -7,22 +7,14 @@ import {
   faPlus,
   faMinus
 } from '@fortawesome/free-solid-svg-icons';
-
-interface CartItem {
-  id: string;
-  name: string;
-  image: string;
-  price: string | number;
-  quantity: number;
-}
+import { AppStateContext } from '@/context/AppStateProvider';
 
 const CartTab: React.FC = () => {
-  const [cart, setCart] = useState<CartItem[]>([]);
-  // Loading state removed as it's unused
-  useEffect(() => {
-    const savedCart = JSON.parse(localStorage.getItem('cart') || '[]');
-    setCart(savedCart);
-  }, []);
+  const { cart, setCart, setOrdersBadgeCount } = useContext(AppStateContext) || {
+    cart: [],
+    setCart: () => {},
+    setOrdersBadgeCount: () => {}
+  };
 
   const updateQuantity = (itemId: string, newQuantity: number) => {
     if (newQuantity < 1) return;
@@ -31,13 +23,12 @@ const CartTab: React.FC = () => {
       item.id === itemId ? {...item, quantity: newQuantity} : item
     );
     setCart(updatedCart);
-    localStorage.setItem('cart', JSON.stringify(updatedCart));
   };
 
   const removeItem = (itemId: string) => {
     const updatedCart = cart.filter(item => item.id !== itemId);
     setCart(updatedCart);
-    localStorage.setItem('cart', JSON.stringify(updatedCart));
+    setOrdersBadgeCount(updatedCart.reduce((sum, item) => sum + item.quantity, 0));
   };
 
   const totalSum = cart.reduce((sum, item) => {

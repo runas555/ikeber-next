@@ -15,6 +15,14 @@ interface AppState {
   isLoading: boolean;
 }
 
+interface CartItem {
+  id: string;
+  name: string;
+  image: string;
+  price: string | number;
+  quantity: number;
+}
+
 interface AppContextValue extends AppState {
   setActiveTab: Dispatch<SetStateAction<string>>;
   openSearchOverlay: () => void;
@@ -25,6 +33,9 @@ interface AppContextValue extends AppState {
   setIsLoading: Dispatch<SetStateAction<boolean>>;
   setOrdersBadgeCount: Dispatch<SetStateAction<number>>;
   logout: () => void;
+  cart: CartItem[];
+  addToCart: (product: CartItem) => void;
+  setCart: Dispatch<SetStateAction<CartItem[]>>;
 }
 
 const defaultState: AppState = {
@@ -57,16 +68,30 @@ const AppStateProvider: React.FC<AppStateProviderProps> = ({ children }) => {
   const [favoritesCount] = useState<number>(defaultState.favoritesCount);
   interface CartItem {
     id: string;
+    name: string;
+    image: string;
+    price: string | number;
     quantity: number;
   }
 
-  const [ordersBadgeCount, setOrdersBadgeCount] = useState<number>(() => {
-    if (typeof window !== 'undefined') {
-      const cart: CartItem[] = JSON.parse(localStorage.getItem('cart') || '[]');
-      return cart.reduce((sum: number, item: CartItem) => sum + item.quantity, 0);
-    }
-    return defaultState.ordersBadgeCount;
-  });
+  const [cart, setCart] = useState<CartItem[]>([]);
+  const [ordersBadgeCount, setOrdersBadgeCount] = useState<number>(defaultState.ordersBadgeCount);
+
+  const addToCart = (product: CartItem) => {
+    setCart(prevCart => {
+      const existingItem = prevCart.find(item => item.id === product.id);
+      const newCart = existingItem 
+        ? prevCart.map(item => 
+            item.id === product.id 
+              ? {...item, quantity: item.quantity + 1} 
+              : item
+          )
+        : [...prevCart, product];
+      
+      setOrdersBadgeCount(newCart.reduce((sum, item) => sum + item.quantity, 0));
+      return newCart;
+    });
+  };
 
   const logout = () => {
     setCurrentUser(null);
@@ -120,6 +145,9 @@ const AppStateProvider: React.FC<AppStateProviderProps> = ({ children }) => {
     favoritesCount,
     ordersBadgeCount,
     setOrdersBadgeCount,
+    cart,
+    addToCart,
+    setCart,
     currentUser,
     isLoading,
     setActiveTab: handleSetActiveTab,

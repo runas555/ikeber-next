@@ -1,5 +1,5 @@
 "use client";
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useContext, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faHome, faThLarge, faListAlt, faUser } from '@fortawesome/free-solid-svg-icons';
@@ -17,31 +17,11 @@ const NavigationBar: React.FC = () => {
   const appState = useContext(AppStateContext);
   const [isSwitching, setIsSwitching] = useState(false);
 
-  interface CartItem {
-    id: string;
-    quantity: number;
-  }
-
-  const { activeTab, setActiveTab, ordersBadgeCount, setOrdersBadgeCount } = appState || {
+  const { activeTab, setActiveTab, ordersBadgeCount } = appState || {
     activeTab: 'home',
     setActiveTab: () => {},
-    ordersBadgeCount: 0,
-    setOrdersBadgeCount: () => {}
+    ordersBadgeCount: 0
   };
-
-  useEffect(() => {
-    if (!appState) return;
-
-    const updateCartCount = () => {
-      const cart: CartItem[] = JSON.parse(localStorage.getItem('cart') || '[]');
-      const count = cart.reduce((sum: number, item: CartItem) => sum + item.quantity, 0);
-      setOrdersBadgeCount(count);
-    };
-
-    updateCartCount();
-    window.addEventListener('storage', updateCartCount);
-    return () => window.removeEventListener('storage', updateCartCount);
-  }, [appState, setOrdersBadgeCount]);
 
   const handleTabClick = async (tabId: string) => {
     if (isSwitching || tabId === activeTab) return;
@@ -75,9 +55,8 @@ const NavigationBar: React.FC = () => {
           >
             <div className="relative">
               <FontAwesomeIcon icon={tab.icon} className={`text-xl mb-0.5 tab-icon ${activeTab === tab.id ? 'scale-110' : ''}`} />
-              {tab.id === 'cart' && typeof window !== 'undefined' && ordersBadgeCount > 0 && (
+              {tab.id === 'cart' && ordersBadgeCount > 0 && (
                 <span 
-                  suppressHydrationWarning
                   className="absolute top-[-3px] right-[-7px] bg-red-500 text-white text-[9px] font-bold rounded-full h-4 w-4 flex items-center justify-center"
                 >
                   {ordersBadgeCount}
