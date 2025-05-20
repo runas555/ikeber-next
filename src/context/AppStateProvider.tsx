@@ -23,6 +23,7 @@ interface AppContextValue extends AppState {
   setSearchStatusText: Dispatch<SetStateAction<string>>;
   setCurrentUser: Dispatch<SetStateAction<User | null>>;
   setIsLoading: Dispatch<SetStateAction<boolean>>;
+  setOrdersBadgeCount: Dispatch<SetStateAction<number>>;
   logout: () => void;
 }
 
@@ -54,7 +55,18 @@ const AppStateProvider: React.FC<AppStateProviderProps> = ({ children }) => {
 
   const [notificationsCount] = useState<number>(defaultState.notificationsCount);
   const [favoritesCount] = useState<number>(defaultState.favoritesCount);
-  const [ordersBadgeCount] = useState<number>(defaultState.ordersBadgeCount);
+  interface CartItem {
+    id: string;
+    quantity: number;
+  }
+
+  const [ordersBadgeCount, setOrdersBadgeCount] = useState<number>(() => {
+    if (typeof window !== 'undefined') {
+      const cart: CartItem[] = JSON.parse(localStorage.getItem('cart') || '[]');
+      return cart.reduce((sum: number, item: CartItem) => sum + item.quantity, 0);
+    }
+    return defaultState.ordersBadgeCount;
+  });
 
   const logout = () => {
     setCurrentUser(null);
@@ -107,6 +119,7 @@ const AppStateProvider: React.FC<AppStateProviderProps> = ({ children }) => {
     notificationsCount,
     favoritesCount,
     ordersBadgeCount,
+    setOrdersBadgeCount,
     currentUser,
     isLoading,
     setActiveTab: handleSetActiveTab,

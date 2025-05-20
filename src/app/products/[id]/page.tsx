@@ -161,7 +161,34 @@ const ProductPage: React.FC<ProductPageProps> = ({ params }) => {
             </>
           )}
         </div>
-        <button className="w-full max-w-md mx-auto bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center justify-center">
+        <button 
+          className="w-full max-w-md mx-auto bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center justify-center"
+          onClick={() => {
+            interface CartItem {
+              id: string;
+              name: string;
+              image: string;
+              price: string | number;
+              quantity: number;
+            }
+            const cart: CartItem[] = JSON.parse(localStorage.getItem('cart') || '[]');
+            const existingItem = cart.find((item: CartItem) => item.id === product.id);
+            
+            if (existingItem) {
+              existingItem.quantity += 1;
+            } else {
+              cart.push({
+                id: product.id,
+                name: product.name,
+                image: product.image,
+                price: product.price,
+                quantity: 1
+              });
+            }
+            
+            localStorage.setItem('cart', JSON.stringify(cart));
+          }}
+        >
           <FontAwesomeIcon icon={faCartPlus} className="mr-2" />
           Добавить в корзину
         </button>

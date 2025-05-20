@@ -1,94 +1,53 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { 
-  faAngleRight,
-  faCheckCircle,
-  faClock,
-  faTruck,
-  faTimesCircle
+import {
+  faTimesCircle,
+  faTrash,
+  faPlus,
+  faMinus
 } from '@fortawesome/free-solid-svg-icons';
 
-interface Order {
+interface CartItem {
   id: string;
-  date: string;
-  status: 'Доставлен' | 'В пути' | 'Обработка' | 'Отменен';
-  items: {
-    image: string;
-    name: string;
-    price: string;
-    quantity: number;
-  }[];
-  total: string;
-  address: string;
+  name: string;
+  image: string;
+  price: string | number;
+  quantity: number;
 }
 
-const sampleOrders: Order[] = [
-  {
-    id: 'ORD-2024-10583',
-    date: '15 мая 2024',
-    status: 'Доставлен',
-    items: [
-      {
-        image: 'https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80',
-        name: 'Ваза "Лазурь"',
-        price: '2 800 ₽',
-        quantity: 1
-      },
-      {
-        image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80',
-        name: 'Кроссовки "Urban Run"',
-        price: '4 690 ₽',
-        quantity: 1
-      }
-    ],
-    total: '7 490 ₽',
-    address: 'ул. Ленина, д. 42, кв. 15'
-  },
-  {
-    id: 'ORD-2024-10579',
-    date: '18 мая 2024',
-    status: 'В пути',
-    items: [
-      {
-        image: 'https://images.unsplash.com/photo-1611117775350-ac3c7099e9c8?ixlib=rb-4.0.3&auto=format&fit=crop&w=100&q=80',
-        name: 'Ремонт холодильника',
-        price: '500 ₽',
-        quantity: 1
-      }
-    ],
-    total: '500 ₽',
-    address: 'ул. Мира, д. 12'
-  }
-];
-
-const statusIcons = {
-  'Доставлен': faCheckCircle,
-  'В пути': faTruck,
-  'Обработка': faClock,
-  'Отменен': faTimesCircle
-};
-
-const statusColors = {
-  'Доставлен': 'text-green-600 bg-green-100',
-  'В пути': 'text-blue-600 bg-blue-100',
-  'Обработка': 'text-yellow-600 bg-yellow-100',
-  'Отменен': 'text-red-600 bg-red-100'
-};
-
 const CartTab: React.FC = () => {
-  const [loading, setLoading] = useState(false);
-  const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
+  const [cart, setCart] = useState<CartItem[]>([]);
+  // Loading state removed as it's unused
+  useEffect(() => {
+    const savedCart = JSON.parse(localStorage.getItem('cart') || '[]');
+    setCart(savedCart);
+  }, []);
 
-  const toggleOrder = (orderId: string) => {
-    setLoading(true);
-    setTimeout(() => {
-      setExpandedOrder(expandedOrder === orderId ? null : orderId);
-      setLoading(false);
-    }, 300);
+  const updateQuantity = (itemId: string, newQuantity: number) => {
+    if (newQuantity < 1) return;
+    
+    const updatedCart = cart.map(item => 
+      item.id === itemId ? {...item, quantity: newQuantity} : item
+    );
+    setCart(updatedCart);
+    localStorage.setItem('cart', JSON.stringify(updatedCart));
   };
 
-  if (sampleOrders.length === 0) {
+  const removeItem = (itemId: string) => {
+    const updatedCart = cart.filter(item => item.id !== itemId);
+    setCart(updatedCart);
+    localStorage.setItem('cart', JSON.stringify(updatedCart));
+  };
+
+  const totalSum = cart.reduce((sum, item) => {
+    const price = typeof item.price === 'number' 
+      ? item.price 
+      : parseFloat(item.price.toString().replace(/[^\d.]/g, ''));
+    return sum + (price * item.quantity);
+  }, 0);
+
+  if (cart.length === 0) {
     return (
       <div className="p-6 text-center">
         <div className="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
@@ -104,96 +63,86 @@ const CartTab: React.FC = () => {
   }
 
   return (
-    <div className="p-4">
+    <div className="p-4 pb-24"> {/* Добавлен отступ снизу для фиксированной панели */}
       <h1 className="text-2xl font-bold text-gray-800 mb-6">Корзина</h1>
       
-      {loading && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-xl">
-            Загружаем информацию...
-          </div>
-        </div>
-      )}
 
-      <div className="space-y-4">
-        {sampleOrders.map((order) => (
-          <div 
-            key={order.id}
-            className={`bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden transition-all
-              ${expandedOrder === order.id ? 'ring-2 ring-blue-500' : ''}`}
-          >
+      <div className="space-y-4 mb-6">
+        {cart.map((item) => (
             <div 
-              className="p-4 cursor-pointer"
-              onClick={() => toggleOrder(order.id)}
+              key={item.id}
+              className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden"
             >
+            <div className="p-4">
               <div className="flex justify-between items-start">
                 <div>
-                  <h3 className="font-bold text-gray-900">Товар #{order.id}</h3>
-                  <p className="text-sm text-gray-500">{order.date}</p>
+                <h3 className="font-bold text-gray-900">{item.name}</h3>
+                <p className="text-sm text-gray-500">Количество: {item.quantity}</p>
                 </div>
-                <div className={`flex items-center text-sm px-3 py-1 rounded-full ${statusColors[order.status]}`}>
-                  <FontAwesomeIcon icon={statusIcons[order.status]} className="mr-2" />
-                  {order.status}
+                <div className="flex items-center space-x-2">
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      updateQuantity(item.id, item.quantity - 1);
+                    }}
+                    className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200"
+                  >
+                    <FontAwesomeIcon icon={faMinus} className="text-gray-600" />
+                  </button>
+                  <span className="text-sm font-medium">{item.quantity}</span>
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      updateQuantity(item.id, item.quantity + 1);
+                    }}
+                    className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200"
+                  >
+                    <FontAwesomeIcon icon={faPlus} className="text-gray-600" />
+                  </button>
                 </div>
               </div>
 
               <div className="mt-3 flex items-center space-x-2">
-                {order.items.slice(0, 3).map((item, index) => (
-                  <div key={index} className="w-12 h-12 rounded-md bg-gray-100 overflow-hidden">
-                    <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
-                  </div>
-                ))}
-                {order.items.length > 3 && (
-                  <div className="w-12 h-12 rounded-md bg-gray-100 flex items-center justify-center">
-                    <span className="text-xs text-gray-500">+{order.items.length - 3}</span>
-                  </div>
-                )}
+                <div className="w-12 h-12 rounded-md bg-gray-100 overflow-hidden">
+                  <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                </div>
               </div>
             </div>
 
-            {expandedOrder === order.id && (
-              <div className="border-t border-gray-200 p-4 bg-gray-50">
-                <h4 className="font-medium mb-3">Состав заказа:</h4>
-                <ul className="space-y-3">
-                  {order.items.map((item, index) => (
-                    <li key={index} className="flex justify-between">
-                      <div className="flex items-center">
-                        <div className="w-10 h-10 rounded-md bg-gray-100 overflow-hidden mr-3">
-                          <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
-                        </div>
-                        <span>{item.name}</span>
-                      </div>
-                      <span className="font-medium">{item.price}</span>
-                    </li>
-                  ))}
-                </ul>
-
-                <div className="mt-4 pt-4 border-t border-gray-200">
-                  <div className="flex justify-between mb-2">
-                    <span>Адрес доставки:</span>
-                    <span className="font-medium">{order.address}</span>
-                  </div>
-                  <div className="flex justify-between text-lg font-bold">
-                    <span>Итого:</span>
-                    <span>{order.total}</span>
-                  </div>
-                </div>
-              </div>
-            )}
 
             <div className="border-t border-gray-200 px-4 py-3 bg-gray-50 flex justify-between items-center">
-              <span className="font-bold">{order.total}</span>
               <button 
-                className="text-blue-600 hover:text-blue-700 flex items-center"
-                onClick={() => toggleOrder(order.id)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  removeItem(item.id);
+                }}
+                className="text-red-500 hover:text-red-700"
               >
-                {expandedOrder === order.id ? 'Свернуть' : 'Подробности'}
-                <FontAwesomeIcon icon={faAngleRight} className={`ml-2 transition-transform ${expandedOrder === order.id ? 'transform rotate-90' : ''}`} />
+                <FontAwesomeIcon icon={faTrash} />
               </button>
+              <span className="font-bold">
+                {typeof item.price === 'number' 
+                  ? item.price * item.quantity 
+                  : parseFloat(item.price.toString().replace(/[^\d.]/g, '')) * item.quantity} ₽
+              </span>
             </div>
           </div>
         ))}
       </div>
+
+      {cart.length > 0 && (
+        <div className="fixed bottom-16 left-0 right-0 bg-white border-t border-gray-200 p-4 shadow-lg z-10">
+          <div className="flex justify-between items-center">
+            <div>
+              <p className="text-sm text-gray-500">Общая сумма</p>
+              <p className="text-xl font-bold">{totalSum} ₽</p>
+            </div>
+            <button className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+              Оформить заказ
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
