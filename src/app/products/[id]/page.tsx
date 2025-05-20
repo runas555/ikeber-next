@@ -131,7 +131,19 @@ const ProductPage: React.FC<ProductPageProps> = ({ params }) => {
           priority
         />
         <h2 className="text-2xl font-bold mb-2 mt-4 text-center">{product.name}</h2>
-        <p className="text-gray-500 text-sm mb-4 text-center">{product.provider}</p>
+        <div className="flex items-center justify-center mb-4">
+          <div className="relative w-4 h-4 mr-1"> {/* Контейнер для аватарки */}
+            <Image
+              src="https://images.unsplash.com/photo-1599305445671-ac291c95aaa9?q=80&w=2069&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" // Временная аватарка с Unsplash
+              alt="Provider Avatar"
+              fill
+              sizes="16px"
+              style={{ objectFit: 'cover', borderRadius: '50%' }}
+              className="rounded-full"
+            />
+          </div>
+          <p className="text-gray-500 text-sm text-center">{product.provider}</p>
+        </div>
         <div className="flex items-center justify-center gap-2 mb-4">
           <p className="text-green-600 font-bold text-lg">
             {product.is_service ? `от ${product.price} ₽` : `${product.price} ₽`}
