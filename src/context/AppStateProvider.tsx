@@ -80,7 +80,30 @@ const AppStateProvider: React.FC<AppStateProviderProps> = ({ children }) => {
   const [isSearchOverlayOpen, setIsSearchOverlayOpen] = useState<boolean>(defaultState.isSearchOverlayOpen);
   const [searchStatusText, setSearchStatusText] = useState<string>(defaultState.searchStatusText);
   const [searchQuery, setSearchQuery] = useState<string>(defaultState.searchQuery);
-  const [currentUser, setCurrentUser] = useState<User | null>(defaultState.currentUser);
+  const [currentUser, _setCurrentUser] = useState<User | null>(() => {
+    if (typeof window !== 'undefined') {
+      const savedUser = localStorage.getItem('currentUser');
+      return savedUser ? JSON.parse(savedUser) : defaultState.currentUser;
+    }
+    return defaultState.currentUser;
+  });
+
+  const setCurrentUser: Dispatch<SetStateAction<User | null>> = (user) => {
+    if (typeof window !== 'undefined') {
+      const newUser = typeof user === 'function' 
+        ? user(currentUser)
+        : user;
+        
+      if (newUser) {
+        localStorage.setItem('currentUser', JSON.stringify(newUser));
+      } else {
+        localStorage.removeItem('currentUser');
+      }
+      _setCurrentUser(newUser);
+    } else {
+      _setCurrentUser(typeof user === 'function' ? user(currentUser) : user);
+    }
+  };
   const [isLoading, setIsLoading] = useState<boolean>(defaultState.isLoading); // Общий isLoading
 
   // Состояния для товаров
