@@ -21,10 +21,10 @@ const CategoriesNavigation: React.FC<{
         <button 
           key={cat.id}
           onClick={() => onSelect(cat.id)}
-          className="flex flex-col items-center p-3 rounded-lg bg-white shadow-sm hover:shadow-md transition-all min-w-[80px]"
+          className="flex flex-col items-center p-3 rounded-lg bg-white shadow-sm min-w-[80px]"
         >
           <div className={`w-10 h-10 bg-${cat.color}-100 rounded-full flex items-center justify-center mb-2`}>
-            <FontAwesomeIcon icon={cat.icon} className={`text-${cat.color}-600`} />
+            <FontAwesomeIcon icon={cat.icon} className={`text-${cat.color}-600`} style={{pointerEvents: 'none'}} />
           </div>
           <span className="text-xs font-medium text-gray-700">{cat.name}</span>
         </button>

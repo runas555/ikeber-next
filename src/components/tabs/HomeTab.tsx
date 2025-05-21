@@ -82,7 +82,7 @@ const HomeTab: React.FC<HomeTabProps> = ({
       <div className="px-4 py-4 bg-amber-50">
         <div className="flex justify-between items-center mb-3">
           <h2 className="text-lg font-semibold text-amber-700">Акции и скидки <FontAwesomeIcon icon={faTags} className="ml-1 text-amber-600" /></h2>
-          <button className="text-amber-600 text-sm font-medium hover:text-amber-800">Все акции →</button>
+          <button className="text-amber-600 text-sm font-medium hover:text-amber-700">Все акции →</button>
         </div>
         <div className="flex overflow-x-auto gap-3 pb-2"> {/* Changed to flex container for horizontal scroll */}
           {loading ? (
@@ -92,7 +92,7 @@ const HomeTab: React.FC<HomeTabProps> = ({
           ) : promotionItems.length > 0 ? (
             promotionItems.map(promo => (
             // Added width for two items visible by default, and flex-none to prevent shrinking
-              <div key={promo.id} className="item-card bg-white rounded-lg overflow-hidden border border-amber-300 relative cursor-pointer w-[calc(50%-0.375rem)] flex-none" onClick={() => router.push(`/products/${promo.id}`)}>
+              <div key={promo.id} className="bg-white rounded-lg overflow-hidden border border-amber-300 relative cursor-pointer w-[calc(50%-0.375rem)] flex-none" onClick={() => router.push(`/products/${promo.id}`)}>
               <Image src={promo.image} alt={promo.name} width={200} height={112} className="w-full h-28 object-cover" />
               {promo.discount && <span className="text-xs bg-red-500 text-white px-2 py-0.5 rounded-md font-semibold absolute top-2 left-2">-{promo.discount}</span>}
               <div className="p-3">
@@ -111,12 +111,12 @@ const HomeTab: React.FC<HomeTabProps> = ({
       </div>
 
       {/* Рекомендуемые товары и услуги */}
-      <div className="px-4 py-4 bg-gray-50">
+      <div className="px-4 py-4">
         <div className="flex justify-between items-center mb-3">
           <h2 className="text-lg font-semibold text-gray-800">Рекомендуем вам</h2>
-          <button className="text-blue-600 text-sm font-medium hover:text-blue-800">Все →</button>
+          <button className="text-blue-600 text-sm font-medium hover:text-blue-700">Все →</button>
         </div>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-3" style={{ perspective: '1000px' }}>
           {loading && recommendedItems.length === 0 ? (
             <div className="col-span-2 flex justify-center py-4">
               <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
@@ -133,7 +133,7 @@ const HomeTab: React.FC<HomeTabProps> = ({
                   ) : (
                     <button 
                       onClick={onLoadMore}
-                      className="text-blue-600 text-sm font-medium hover:text-blue-800"
+                      className="text-blue-600 text-sm font-medium hover:text-blue-700"
                     >
                       Загрузить еще
                     </button>

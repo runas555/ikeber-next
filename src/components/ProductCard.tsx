@@ -28,7 +28,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ item, /* onAddToCart, */ clas
   return (
     <Link href={`/products/${item.id}`} passHref>
       <div
-        className={`item-card bg-white rounded-lg overflow-hidden cursor-pointer ${className}`} // cursor-pointer теперь всегда
+        className={`bg-white rounded-lg overflow-hidden cursor-pointer border border-gray-200 ${className}`}
         data-item-id={item.id}
       >
         <div className="relative w-full h-48"> {/* Container for Image - увеличенная высота */}
@@ -38,7 +38,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ item, /* onAddToCart, */ clas
           fill
           sizes="(max-width: 768px) 50vw, 200px" // Adjust sizes
           style={{ objectFit: 'cover' }}
-          className="transform group-hover:scale-105 transition-transform duration-300" // Example hover effect
+            className="product-card-image" // Hover effect will be controlled via CSS
         />
       </div>
       <div className="p-3 sm:p-4"> {/* Увеличен padding */}

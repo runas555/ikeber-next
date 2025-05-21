@@ -76,9 +76,8 @@ const CategoriesTab: React.FC<CategoriesTabProps> = ({ region }) => {
             }}
             passHref
             className={`
-              flex flex-col items-center p-2 rounded-lg transition-all
+              flex flex-col items-center p-2 rounded-lg
               ${category.bgColor} ${category.color}
-              hover:scale-105 hover:shadow-md
               focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-400
             `}
           >
