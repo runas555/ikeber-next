@@ -62,11 +62,18 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSwitchToLogin }) 
         return;
       }
 
+      // Генерируем аватарку
+      const avatarUrl = `https://i.pravatar.cc/150?u=${phoneNumber}`;
+      
       // Регистрируем нового пользователя
       const { data, error } = await supabase
         .from('users')
-        .insert([{ phone_number: phoneNumber }])
-        .select()
+        .insert([{ 
+          phone_number: phoneNumber,
+          avatar_url: avatarUrl,
+          address: ''
+        }])
+        .select('id, phone_number, name, surname, avatar_url, address')
         .single();
 
       if (error) {
@@ -77,6 +84,10 @@ const RegistrationForm: React.FC<RegistrationFormProps> = ({ onSwitchToLogin }) 
       setCurrentUser({
         id: data.id,
         phoneNumber: data.phone_number,
+        name: data.name,
+        surname: data.surname,
+        avatar_url: data.avatar_url,
+        address: data.address
       });
       setActiveTab('profile');
     } catch (err) {

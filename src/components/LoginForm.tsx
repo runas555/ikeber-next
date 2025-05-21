@@ -28,7 +28,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister }) => {
     try {
       const { data, error } = await supabase
         .from('users')
-        .select('*')
+        .select('id, phone_number, name, surname, avatar_url, address')
         .eq('phone_number', phoneNumber)
         .single();
 
@@ -40,6 +40,10 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSwitchToRegister }) => {
       setCurrentUser({
         id: data.id,
         phoneNumber: data.phone_number,
+        name: data.name,
+        surname: data.surname,
+        avatar_url: data.avatar_url,
+        address: data.address
       });
       setActiveTab('profile');
     } catch {

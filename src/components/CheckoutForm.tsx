@@ -1,12 +1,21 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { AddressSuggestions, DaDataSuggestion, DaDataAddress } from 'react-dadata';
 import 'react-dadata/dist/react-dadata.css';
+import { supabase } from '@/lib/supabase';
+import { AppStateContext } from '@/context/AppStateProvider';
 
 const CheckoutForm = () => {
-  const [phone, setPhone] = useState('+7');
-  const [address, setAddress] = useState('');
+  const { cart, setCurrentUser, setCart, currentUser, setOrdersBadgeCount } = useContext(AppStateContext);
+  const [phone, setPhone] = useState(currentUser?.phoneNumber || '+7');
+  const [address, setAddress] = useState(currentUser?.address || '');
+
+  useEffect(() => {
+    if (currentUser?.address) {
+      setAddress(currentUser.address);
+    }
+  }, [currentUser?.address]);
   const dadataToken = process.env.NEXT_PUBLIC_DADATA_API_KEY;
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -28,10 +37,85 @@ const CheckoutForm = () => {
     setAddress(suggestion?.value || '');
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Order submitted:', { phone, address });
-    alert('Заказ оформлен!');
+    
+    if (!phone || !address) {
+      alert('Заполните телефон и адрес');
+      return;
+    }
+
+    try {
+      // 1. Проверяем/создаем пользователя
+      let userId;
+      const { data: existingUser } = await supabase
+        .from('users')
+        .select('id')
+        .eq('phone_number', phone)
+        .single();
+
+      if (existingUser) {
+        userId = existingUser.id;
+        // Обновляем адрес если нужно
+        await supabase
+          .from('users')
+          .update({ address })
+          .eq('id', userId);
+      } else {
+        // Создаем нового пользователя
+        const { data: newUser, error } = await supabase
+          .from('users')
+          .insert([{ 
+            phone_number: phone,
+            address: address
+          }])
+          .select('id')
+          .single();
+
+        if (error) throw error;
+        userId = newUser.id;
+      }
+
+      // 2. Создаем заказ
+      const { data: orderData, error: orderError } = await supabase
+        .from('orders')
+        .insert({
+          user_id: userId,
+          address: address,
+          items: cart,
+          status: 'new'
+        })
+        .select();
+
+      if (orderError || !orderData) throw orderError || new Error('Не удалось создать заказ');
+      
+      console.log('Заказ создан:', orderData);
+
+      // 3. Обновляем состояние
+      if (!existingUser) {
+        setCurrentUser({
+          id: userId,
+          phoneNumber: phone,
+          address: address
+        });
+      }
+      // Очищаем корзину и обновляем состояние
+      setCart([]);
+      // Обновляем localStorage
+      localStorage.removeItem('cart');
+      // Сбрасываем счетчик в табе
+      localStorage.setItem('ordersBadgeCount', '0');
+      // Обновляем состояние счетчика
+      if (setOrdersBadgeCount) {
+        setOrdersBadgeCount(0);
+      }
+      
+      // Перенаправляем на страницу успешного оформления
+      window.location.href = '/order-success';
+    } catch (error) {
+      console.error('Ошибка оформления заказа:', error);
+      alert('Ошибка при оформлении заказа');
+    }
   };
 
   return (
@@ -63,7 +147,7 @@ const CheckoutForm = () => {
         <div className="mt-1">
           <AddressSuggestions
             token={dadataToken || ''}
-            value={address as unknown as DaDataSuggestion<DaDataAddress>}
+            value={address ? { value: address } as DaDataSuggestion<DaDataAddress> : undefined}
             onChange={handleAddressChange}
             inputProps={{
               placeholder: "Начните вводить адрес",
