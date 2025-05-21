@@ -71,7 +71,9 @@ const CheckoutForm = () => {
             }}
           />
         </div>
-        
+        <p className="mt-2 text-sm text-gray-500">
+          Начните вводить адрес для автодополнения
+        </p>
       </div>
 
       <div>
