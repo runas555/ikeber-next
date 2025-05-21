@@ -21,7 +21,7 @@ const ProfileTab: React.FC = () => {
   interface Order {
     id: string;
     created_at: string;
-    status: 'new' | 'delivered' | 'processing';
+    status: 'new' | 'delivered' | 'processing' | 'canceled';
     items: Array<{
       id: string;
       name: string;
@@ -199,10 +199,12 @@ const ProfileTab: React.FC = () => {
                   <span className={`${
                     order.status === 'new' ? 'bg-blue-100 text-blue-800' :
                     order.status === 'delivered' ? 'bg-green-100 text-green-800' :
+                    order.status === 'canceled' ? 'bg-red-100 text-red-800' :
                     'bg-yellow-100 text-yellow-800'
                   } text-xs px-2 py-1 rounded`}>
                     {order.status === 'new' ? 'Новый' : 
-                     order.status === 'delivered' ? 'Доставлен' : 'В обработке'}
+                     order.status === 'delivered' ? 'Доставлен' :
+                     order.status === 'canceled' ? 'Отменен' : 'В обработке'}
                   </span>
                 </div>
                 <div className="mt-2">
@@ -210,7 +212,37 @@ const ProfileTab: React.FC = () => {
                     {order.items.length} товара на сумму{' '}
                     {order.items.reduce((sum, item) => sum + (item.price * item.quantity), 0)} ₽
                   </p>
-                  <div className="mt-2 border-t pt-2 space-y-2">
+                <div className="mt-2 border-t pt-2 space-y-2">
+                  {order.status === 'new' && (
+                    <button 
+                      onClick={async () => {
+                        try {
+                          const { error } = await supabase
+                            .from('orders')
+                            .update({ status: 'canceled' })
+                            .eq('id', order.id);
+
+                          if (error) throw error;
+                          
+                          await supabase
+                            .from('notifications')
+                            .insert({
+                              user_id: currentUser.id,
+                              message: 'Вы отменили свой заказ',
+                              type: 'order_canceled'
+                            });
+
+                          fetchOrders();
+                        } catch (error) {
+                          console.error('Ошибка отмены заказа:', error);
+                          alert('Не удалось отменить заказ');
+                        }
+                      }}
+                      className="w-full text-left text-red-600 hover:text-red-800 text-sm py-1"
+                    >
+                      Отменить заказ
+                    </button>
+                  )}
                     {order.items.map((item, index) => (
                       <Link 
                         key={index} 

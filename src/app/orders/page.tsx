@@ -2,14 +2,13 @@
 
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
-import Button from '@/components/Button';
 
 interface Order {
   id: string;
   user_id: string;
   address: string;
   items: OrderItem[] | string;
-  status: 'new' | 'processing' | 'delivered';
+  status: 'new' | 'processing' | 'delivered' | 'canceled';
   created_at: string;
   user: {
     phone_number: string;
@@ -61,7 +60,14 @@ export default function OrdersManagementDashboard() {
     };
   }, []);
 
-  const updateOrderStatus = async (orderId: string, newStatus: string) => {
+  const updateOrderStatus = async (orderId: string, newStatus: 'new' | 'processing' | 'delivered' | 'canceled') => {
+    // Оптимистичное обновление UI
+    setOrders(prevOrders => 
+      prevOrders.map(order => 
+        order.id === orderId ? {...order, status: newStatus} : order
+      )
+    );
+
     const { error } = await supabase
       .from('orders')
       .update({ status: newStatus })
@@ -69,6 +75,12 @@ export default function OrdersManagementDashboard() {
 
     if (error) {
       console.error('Error updating order:', error);
+      // Откатываем изменения если ошибка
+      setOrders(prevOrders => 
+        prevOrders.map(order => 
+          order.id === orderId ? {...order, status: order.status} : order
+        )
+      );
     } else {
       // Отправляем уведомление пользователю
       await supabase
@@ -113,24 +125,25 @@ export default function OrdersManagementDashboard() {
                 </p>
                 <p className="mt-2">Адрес: {order.address}</p>
                 <p>Телефон: {order.user?.phone_number || 'не указан'}</p>
-                <p>Статус: {order.status}</p>
-              </div>
-              
-              <div className="flex space-x-2">
-                <Button 
-                  onClick={() => updateOrderStatus(order.id, 'processing')}
-                  disabled={order.status === 'processing'}
-                  className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm"
-                >
-                  В обработке
-                </Button>
-                <Button 
-                  onClick={() => updateOrderStatus(order.id, 'delivered')}
-                  disabled={order.status === 'delivered'}
-                  className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-sm"
-                >
-                  Доставлен
-                </Button>
+                <div className="mt-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Статус:</label>
+                  <select
+                    value={order.status}
+                    onChange={(e) => updateOrderStatus(order.id, e.target.value as 'new' | 'processing' | 'delivered' | 'canceled')}
+                    className="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+                  >
+                    <option value="new" className="bg-blue-50">Новый</option>
+                    <option value="processing" disabled={order.status !== 'new' && order.status !== 'processing'} className="bg-yellow-50">
+                      В обработке
+                    </option>
+                    <option value="delivered" disabled={order.status !== 'processing'} className="bg-green-50">
+                      Доставлен
+                    </option>
+                    <option value="canceled" disabled={order.status !== 'new'} className="bg-red-50">
+                      Отменен
+                    </option>
+                  </select>
+                </div>
               </div>
             </div>
 

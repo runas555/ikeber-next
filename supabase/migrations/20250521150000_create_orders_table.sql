@@ -1,10 +1,10 @@
--- Создаем таблицу заказов
+-- Обновляем существующую таблицу заказов
 CREATE TABLE public.orders (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id uuid REFERENCES public.users(id) ON DELETE CASCADE,
   address text NOT NULL,
   items jsonb NOT NULL,
-  status text NOT NULL DEFAULT 'new' CHECK (status IN ('new', 'processing', 'delivered')),
+  status text NOT NULL DEFAULT 'new' CHECK (status IN ('new', 'processing', 'delivered', 'canceled')),
   created_at timestamp with time zone DEFAULT now()
 );
 
