@@ -62,11 +62,15 @@ const ProfileTab: React.FC = () => {
     const channel = supabase
       .channel('orders_changes')
       .on('postgres_changes', {
-        event: '*',
+        event: 'UPDATE',
         schema: 'public',
         table: 'orders'
-      }, () => {
-        fetchOrders();
+      }, (payload) => {
+        // Принудительно обновляем если изменился статус
+        // Обновляем при любом изменении заказа текущего пользователя
+        if (payload.new.user_id === currentUser?.id) {
+          fetchOrders();
+        }
       })
       .subscribe();
 
