@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useContext, useEffect } from 'react';
+import FullPageLoader from './FullPageLoader';
 import { AddressSuggestions, DaDataSuggestion, DaDataAddress } from 'react-dadata';
 import 'react-dadata/dist/react-dadata.css';
 import { supabase } from '@/lib/supabase';
@@ -8,6 +9,7 @@ import { AppStateContext } from '@/context/AppStateProvider';
 
 const CheckoutForm = () => {
   const { cart, setCurrentUser, setCart, currentUser, setOrdersBadgeCount } = useContext(AppStateContext);
+  const [isLoading, setIsLoading] = useState(false);
   const [phone, setPhone] = useState(currentUser?.phoneNumber || '+7');
   const [address, setAddress] = useState(currentUser?.address || '');
 
@@ -45,6 +47,7 @@ const CheckoutForm = () => {
       return;
     }
 
+    setIsLoading(true);
     try {
       // 1. Проверяем/создаем пользователя
       let userId;
@@ -74,6 +77,14 @@ const CheckoutForm = () => {
 
         if (error) throw error;
         userId = newUser.id;
+
+        // Автоматически входим в систему
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          phone: phone,
+          password: phone // Используем телефон как временный пароль
+        });
+
+        if (signInError) throw signInError;
       }
 
       // 2. Создаем заказ
@@ -92,13 +103,11 @@ const CheckoutForm = () => {
       console.log('Заказ создан:', orderData);
 
       // 3. Обновляем состояние
-      if (!existingUser) {
-        setCurrentUser({
-          id: userId,
-          phoneNumber: phone,
-          address: address
-        });
-      }
+      setCurrentUser({
+        id: userId,
+        phoneNumber: phone,
+        address: address
+      });
       // Очищаем корзину и обновляем состояние
       setCart([]);
       // Обновляем localStorage
@@ -115,8 +124,13 @@ const CheckoutForm = () => {
     } catch (error) {
       console.error('Ошибка оформления заказа:', error);
       alert('Ошибка при оформлении заказа');
+      setIsLoading(false);
     }
   };
+
+  if (isLoading) {
+    return <FullPageLoader />;
+  }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
