@@ -24,8 +24,10 @@ const ProductPage: React.FC<ProductPageProps> = ({ params }) => {
     openSearchOverlay, 
     closeSearchOverlay, 
     setSearchStatusText,
-    addToCart 
+    addToCart,
+    cart
   } = useContext(AppStateContext);
+  const [showCartHint, setShowCartHint] = useState(false);
   const [product, setProduct] = useState<Item | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -202,17 +204,48 @@ const ProductPage: React.FC<ProductPageProps> = ({ params }) => {
         </div>
         <button 
           className="w-full max-w-md mx-auto bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center justify-center"
-          onClick={() => addToCart({
-            id: product.id,
-            name: product.name,
-            image: product.image,
-            price: product.price,
-            quantity: 1
-          })}
+          onClick={() => {
+            addToCart({
+              id: product.id,
+              name: product.name,
+              image: product.image,
+              price: product.price,
+              quantity: 1
+            });
+            // Показываем подсказку если корзина была пуста
+            if (cart.length === 0) {
+              setShowCartHint(true);
+              setTimeout(() => setShowCartHint(false), 3000);
+            }
+          }}
         >
           <FontAwesomeIcon icon={faCartPlus} className="mr-2" />
           Добавить в корзину
         </button>
+        
+        {showCartHint && (
+          <div className="fixed bottom-20 right-12 min-w-[200px] bg-white p-4 rounded-lg shadow-lg z-50 border border-gray-200 animate-bounce sm:right-4">
+            <div className="flex flex-col items-center justify-center w-full text-center">
+              <span className="mb-1">Товар добавлен в корзину!</span>
+              <div className="flex flex-col items-center">
+                <span className="mb-1">Смотрите в корзине</span>
+                <svg 
+                  className="w-6 h-6 text-blue-500" 
+                  fill="none" 
+                  stroke="currentColor" 
+                  viewBox="0 0 24 24"
+                >
+                  <path 
+                    strokeLinecap="round" 
+                    strokeLinejoin="round" 
+                    strokeWidth={2} 
+                    d="M19 14l-7 7m0 0l-7-7m7 7V3" 
+                  />
+                </svg>
+              </div>
+            </div>
+          </div>
+        )}
         {/* Кнопка WhatsApp удалена отсюда, т.к. перемещена к провайдеру */}
         {/* <p className="text-sm text-gray-600 mt-2 text-center max-w-md mx-auto">Оплата при получении</p> Удалено, т.к. перемещено к цене */}
         <div className="mt-6 max-w-md mx-auto">
