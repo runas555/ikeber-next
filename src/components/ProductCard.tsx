@@ -97,7 +97,17 @@ const ProductCard: React.FC<ProductCardProps> = ({ item, /* onAddToCart, */ clas
         </div>
         {/* Кнопка добавления в корзину удалена */}
         <button className="bg-blue-500 text-white rounded p-2 text-xs w-full mt-2">
-          Доставка сегодня
+          {(() => {
+            // Используем клиентское время (локальное время пользователя)
+            const now = new Date();
+            const hours = now.getHours();
+            const isAfternoon = hours >= 15;
+            if (item.is_service) {
+              return isAfternoon ? "Доступно завтра" : "Доступно сегодня";
+            } else {
+              return isAfternoon ? "Доставим завтра" : "Доставим сегодня";
+            }
+          })()}
         </button>
       </div>
     </div>
