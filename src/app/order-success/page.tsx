@@ -30,6 +30,9 @@ export default function OrderSuccessPage() {
         <p className="mt-2 text-gray-600">
           Спасибо за ваш заказ. Мы свяжемся с вами в ближайшее время для уточнения деталей.
         </p>
+        <p className="mt-2 text-green-600 font-medium">
+          Вы вошли в свой аккаунт! Теперь вы можете отслеживать заказы в личном кабинете.
+        </p>
         <div className="mt-8">
           <Button
             onClick={() => router.push('/')}
